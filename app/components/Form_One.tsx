@@ -8,7 +8,7 @@ function Form_One() {
   const router = useRouter()
   return (
     <form action="" className='flex px-6 md:px-0  flex-col gap-4 justify-center'>
-        <div style={{background: 'linear-gradient(92.63deg, #D7C798 34.94%, #EDE4CC 53.8%, #D7C798 78.45%)'}} className='md:w-[430px] w-[380px] text-2xl rounded-full h-[50px] px-2 py-1 flex gap-3 font-seasons  mx-auto'>
+        <div style={{background: 'linear-gradient(92.63deg, #D7C798 34.94%, #EDE4CC 53.8%, #D7C798 78.45%)'}} className='md:w-[430px] w-[380px] text-2xl rounded-full h-[50px] px-6  md:px-2 py-1 flex gap-3 font-seasons  mx-auto'>
         <Image
         src = '/person.svg'
         width = {40}
