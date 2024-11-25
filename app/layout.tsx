@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Header from "./components/Header";
 
 const harmoniaSans = localFont({
   src: [
@@ -39,10 +38,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${harmoniaSans.variable} bg-[url('/santa.jpeg')] bg-cover bg-center bg-no-repeat h-screen w-full ${theSeasons.variable} antialiased`}
+        className={`${harmoniaSans.variable}  ${theSeasons.variable} antialiased`}
       >
-
-      <Header />
+      
         {children}
       </body>
     </html>

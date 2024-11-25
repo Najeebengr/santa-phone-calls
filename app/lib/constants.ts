@@ -1,3 +1,5 @@
+import { Plan } from "./types"
+
 export const nav_items = [
     {
         name: "Home",
@@ -275,3 +277,7 @@ export const MessageFromSanta = [
       status: 'cross',
     }
   ]
+  export const plans: Plan[] = [
+    { id: 1, name: "Talk to Santa", description: 'A one-time, personalized call from Santa, perfect for creating a magical moment that will surprise your child or loved one with joyful holiday cheer they’ll remember forever.', price: '$9.95', per: '/ Call' },
+    { id: 2, name: "Includes Recording", description: 'A five-minute personalized call from Santa, including a special recording so you can relive the magic and cherished memories of this moment for years to come.', price: '$14.95', per: '/ Recording' },
+  ];
