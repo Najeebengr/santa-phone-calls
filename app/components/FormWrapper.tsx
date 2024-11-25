@@ -29,7 +29,7 @@ function FormWrapper() {
           </button>
         </div>
       </div>
-      <div className='form'>
+      <div className='form px-6 md:px-0'>
         <Form_One />
       </div>
     </div>
