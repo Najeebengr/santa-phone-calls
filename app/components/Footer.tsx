@@ -7,7 +7,7 @@ function Footer() {
     <div className='flex pt-12 md:py-0 flex-col md:flex-row justify-center md:justify-between items-center md:items-end '>
       <div className='text-lg md:text-2xl relative left-0 md:left-0 lg:left-0 xl:-left-6  text-white font-harmonia border-b-2 border-white'>
         <Link href={'/'}>
-        See How<br className='hidden md:inline'/> We&aposre Better? 
+        See How<br className='hidden md:inline'/> {`We're Better?`} 
         <Image 
         src = '/Vector.svg'
         width = {15}
