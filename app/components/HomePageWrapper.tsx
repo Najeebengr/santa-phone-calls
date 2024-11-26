@@ -1,7 +1,7 @@
 import React from 'react'
 import Image from 'next/image'
-import Form_One from './Form_One'
-function FormWrapper() {
+import FormOne from './FormOne'
+function HomePageWrapper() {
   return (
     <div className='container  my-6 h-[62vh] md:h-[70vh]  justify-between mx-auto flex flex-col gap-4'>
       <div className='text flex flex-col gap-2'>
@@ -30,10 +30,10 @@ function FormWrapper() {
         </div>
       </div>
       <div className='form px-6 md:px-0'>
-        <Form_One />
+        <FormOne />
       </div>
     </div>
   )
 }
 
-export default FormWrapper
+export default HomePageWrapper

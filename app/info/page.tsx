@@ -1,5 +1,5 @@
 import React from 'react'
-import Form_Two from '../components/Form_Two'
+import InfoFormWrapper from '../components/InfoFormWrapper'
 
 function Info() {
   return (
@@ -15,7 +15,7 @@ function Info() {
         </p>
       </div>
       <div>
-        <Form_Two />
+        <InfoFormWrapper />
       </div>
     </section>
   )

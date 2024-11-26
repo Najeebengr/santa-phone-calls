@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 
 const harmoniaSans = localFont({
   src: [
@@ -40,7 +41,7 @@ export default function RootLayout({
       <body
         className={`${harmoniaSans.variable}  ${theSeasons.variable} antialiased`}
       >
-      
+      <Toaster position="top-right" reverseOrder={false} />
         {children}
       </body>
     </html>

@@ -1,17 +1,14 @@
 "use client";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import {  } from "react-icons/fa";
-import {  SiMastercard } from "react-icons/si";
 import Image from "next/image";
-import { GrVisa } from "react-icons/gr";
 import Link from "next/link";
 import { plans } from "../lib/constants";
 import { Plan } from "../lib/types";
+import FormThree from "../components/FormThree";
 function Checkout() {
-  const [activePlan, setActivePlan] = useState(plans[0].id); // Default to first plan's id
-  const [price, setPrice] = useState(plans[0].price); // Default to first plan's price
-  const [planName, setPlanName] = useState(plans[0].name);
+  const [activePlan, setActivePlan] = useState(plans[1].id); // Default to first plan's id
+  const [price, setPrice] = useState(plans[1].price); // Default to first plan's price
+  const [planName, setPlanName] = useState(plans[1].name);
 
   const handlePlanChange = (id: number) => {
     const selectedPlan = plans.find((plan) => plan.id === id); // Find plan by id
@@ -23,7 +20,6 @@ function Checkout() {
   };
   
 
-  const router = useRouter();
   return (
     <section className="lg:bg-cover bg-center bg-no-repeat h-full lg:h-screen w-full bg-[url('/christmas.jpeg')] py-10 lg:py-5 xl:py-10 px-6 lg:px-6 md:px-0 mx-auto relative z-10">
       <div
@@ -74,91 +70,8 @@ function Checkout() {
               <p>{price}</p>
             </div>
           </div>
-          <div className="fields">
-            <div className="card-number">
-              <label
-                style={{ textShadow: "0 0 20px #FCCC73" }}
-                htmlFor=""
-                className=" text-lg text-white font-semibold font-seasons"
-              >
-                Card Number
-              </label>
-              <input
-                type="text"
-                placeholder="Enter card number"
-                className="bg-[#554735] border-[1px] border-[#827E4B] my-2 py-2.5 px-4 text-white placeholder:text-[#FFFFFF80] font-harmonia text-lg font-normal focus:outline-none w-full h-full rounded-full"
-              />
-            </div>
-            <div className="card-details my-2 gap-5 flex flex-col md:flex-row items-center justify-between">
-              <div>
-                <label
-                  style={{ textShadow: "0 0 20px #FCCC73" }}
-                  htmlFor=""
-                  className=" text-lg text-white font-semibold font-seasons"
-                >
-                  Zip Code
-                </label>
-                <input
-                  type="text"
-                  placeholder="Zip Code"
-                  className="bg-[#554735] border-[1px] border-[#827E4B] my-2 py-2.5 px-4 text-white placeholder:text-[#FFFFFF80] font-harmonia text-lg font-normal focus:outline-none w-full h-full rounded-full"
-                />
-              </div>
-              <div>
-                <label
-                  style={{ textShadow: "0 0 20px #FCCC73" }}
-                  htmlFor=""
-                  className=" text-lg text-white font-semibold font-seasons"
-                >
-                  Expiration
-                </label>
-                <input
-                  type="text"
-                  placeholder="Expiration"
-                  className="bg-[#554735] border-[1px] border-[#827E4B] my-2 py-2.5 px-4 text-white placeholder:text-[#FFFFFF80] font-harmonia text-lg font-normal focus:outline-none w-full h-full rounded-full"
-                />
-              </div>
-              <div>
-                <label
-                  style={{ textShadow: "0 0 20px #FCCC73" }}
-                  htmlFor=""
-                  className=" text-lg text-white font-semibold font-seasons"
-                >
-                  CVV
-                </label>
-                <input
-                  type="text"
-                  placeholder="CVV"
-                  className="bg-[#554735] border-[1px] border-[#827E4B] my-2 py-2.5 px-4 text-white placeholder:text-[#FFFFFF80] font-harmonia text-lg font-normal focus:outline-none w-full h-full rounded-full"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="button">
-            <button
-              onClick={(event) => {
-                event.preventDefault();
-                router.push("/checkout");
-              }}
-              style={{
-                background:
-                  "linear-gradient(144.94deg, #C70A27 31.33%, #7B0F10 100.41%)",
-                border: "3px solid #a5494d ",
-                boxShadow: "0px 0px 40px 0px #D9C99966",
-              }}
-              className="w-fit mx-auto font-seasons text-base md:text-lg my-3 flex justify-center items-center gap-1 text-white font-bold py-3 px-8 rounded-full"
-            >
-              <Image
-                src="/american_express.svg"
-                width={20}
-                height={10}
-                alt="american_express"
-              />
-              <SiMastercard className="text-white" />
-              <GrVisa />
-              Pay with Shop Pay{" "}
-            </button>
-          </div>
+           <FormThree />
+
           <div className="payment-methods flex flex-col gap-4 my-8">
             <div className="apple">
               <div

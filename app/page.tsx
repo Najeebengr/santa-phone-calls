@@ -1,7 +1,7 @@
 'use client';
 import Footer from "./components/Footer";
-import FormWrapper from "./components/FormWrapper";
 import Header from "./components/Header";
+import HomePageWrapper from "./components/HomePageWrapper";
 
 export default function Home() {
   return (
@@ -9,7 +9,7 @@ export default function Home() {
       <Header />
       {/* <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black-400 to-transparent"></div> */}
     <main>
-      <FormWrapper />
+      <HomePageWrapper />
       <Footer />
       
     </main>
