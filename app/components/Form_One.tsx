@@ -8,16 +8,16 @@ function Form_One() {
   const router = useRouter()
   return (
     <form action="" className='flex px-6 md:px-0  flex-col gap-4 justify-center'>
-        <div style={{background: 'linear-gradient(92.63deg, #D7C798 34.94%, #EDE4CC 53.8%, #D7C798 78.45%)'}} className='md:w-[430px] w-[380px] text-2xl rounded-full h-[50px] px-6  md:px-2 py-1 flex gap-3 font-seasons  mx-auto'>
+        <div style={{background: 'linear-gradient(92.63deg, #D7C798 34.94%, #EDE4CC 53.8%, #D7C798 78.45%)'}} className='w-full text-xl rounded-full px-2 py-2 flex gap-2 justify-center  items-center font-seasons  mx-auto lg:w-[30%] md:w-[40%]'>
         <Image
         src = '/person.svg'
         width = {40}
         height = {10}
         alt = "person"
         />
-        <input type="text" placeholder="Child’s Name" className='text-black placeholder:text-black font-normal focus:outline-none bg-inherit w-full h-full rounded-full' />
+        <input type="text" placeholder="Child’s Name" className='text-black placeholder:text-black font-normal focus:outline-none bg-inherit w-full h-full rounded-full ' />
         </div>
-        <div style={{background: 'linear-gradient(92.63deg, #D7C798 34.94%, #EDE4CC 53.8%, #D7C798 78.45%)'}} className='md:w-[430px] w-[380px] text-2xl rounded-full h-[50px] px-2 py-1 flex gap-3 font-seasons  mx-auto'>
+        <div style={{background: 'linear-gradient(92.63deg, #D7C798 34.94%, #EDE4CC 53.8%, #D7C798 78.45%)'}} className='w-full text-xl rounded-full px-2 py-2 flex gap-2 justify-center  items-center font-seasons  mx-auto lg:w-[30%] md:w-[40%]'>
         <Image
         src = '/call.svg'
         width = {40}
@@ -26,7 +26,7 @@ function Form_One() {
         />
         <input type="text" placeholder="Your Phone " className='text-black placeholder:text-black focus:outline-none bg-inherit w-full h-full rounded-full' />
         </div>
-        <div style={{background: 'linear-gradient(92.63deg, #D7C798 34.94%, #EDE4CC 53.8%, #D7C798 78.45%)'}} className='md:w-[430px] w-[380px] text-2xl rounded-full h-[50px] px-2 py-1 flex gap-3 font-seasons  mx-auto'>
+        <div style={{background: 'linear-gradient(92.63deg, #D7C798 34.94%, #EDE4CC 53.8%, #D7C798 78.45%)'}} className='w-full text-xl rounded-full px-2 py-2 flex gap-2 justify-center  items-center font-seasons  mx-auto lg:w-[30%] md:w-[40%]'>
         <Image
         src = '/email.svg'
         width = {40}

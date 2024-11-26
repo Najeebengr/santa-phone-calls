@@ -2,14 +2,17 @@ import { Plan } from "./types"
 
 export const nav_items = [
     {
+        id: 'home',
         name: "Home",
         href: "/",
     },
     {
+       id: 'how-it-works',
         name: "How it works",
         href: "/how-it-works",
     },
     {
+       id: 'pricing',
         name: "Pricing",
         href: "/pricing",
     },

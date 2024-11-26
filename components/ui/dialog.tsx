@@ -5,7 +5,6 @@ import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { useRouter } from "next/navigation"
 
 const Dialog = DialogPrimitive.Root
 
@@ -34,7 +33,7 @@ const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
-  const router = useRouter()
+  
   return (
   <DialogPortal>
     <DialogOverlay />
@@ -47,7 +46,7 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close onClick={() => router.push("/")} className="absolute rounded-lg -right-4 -top-12 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none  focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+      <DialogPrimitive.Close  className="absolute rounded-lg -right-4 -top-12 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none  focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
         <X className="h-8 w-10 text-[#D9C999]" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
