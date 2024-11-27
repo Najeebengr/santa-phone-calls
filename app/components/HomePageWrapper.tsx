@@ -3,7 +3,7 @@ import Image from 'next/image'
 import FormOne from './FormOne'
 function HomePageWrapper() {
   return (
-    <div className='container  my-6 h-[62vh] md:h-[70vh]  justify-between mx-auto flex flex-col gap-28 md:gap-4'>
+    <div className='container  my-6 h-full md:h-[70vh]  justify-between mx-auto flex flex-col gap-28 md:gap-4'>
       <div className='text flex flex-col gap-2'>
 
   <h2 style={{  textShadow: '0 0 20px #FCCC73', }} className='text-4xl md:text-6xl 2xl:text-7xl font-black text-center font-seasons  text-white'>

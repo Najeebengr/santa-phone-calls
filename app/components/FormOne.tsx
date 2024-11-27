@@ -141,7 +141,7 @@ function FormOne() {
     className='text-black font-harmonia placeholder:font-seasons placeholder:text-black focus:outline-none px-2 bg-inherit w-full h-full rounded-full' 
 />
         </div>
-        <button type="submit" style={{background: 'linear-gradient(144.94deg, #C70A27 31.33%, #7B0F10 100.41%)', border: '3px solid #a5494d ', boxShadow: '0px 0px 40px 0px #D9C99966'}} className='w-fit mx-auto font-seasons text-xl my-3 flex justify-center items-center gap-2 text-white font-bold py-3 px-8 rounded-full'>Continue to Step 2 <FaArrowRight /></button>
+        <button type="submit" style={{background: 'linear-gradient(144.94deg, #C70A27 31.33%, #7B0F10 100.41%)', border: '3px solid #a5494d ', boxShadow: '0px 0px 40px 0px #D9C99966'}} className='w-fit mx-auto font-seasons text-lg  md:text-xl my-3 flex justify-center items-center gap-2 text-white font-bold py-3 px-8 rounded-full'>Continue to Step 2 <FaArrowRight /></button>
         <p className='text-center font-harmonia text-lg md:text-xl text-white'>
         By continuing, I agree to user <Link href={'/'} className='border-b-2 border-white'> terms & privacy policy </Link>
         </p>
