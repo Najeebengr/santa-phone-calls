@@ -12,7 +12,7 @@ function HomePageWrapper() {
         <p style={{  textShadow: '0 0 12px #FCCC73', }} className='text-lg md:text-3xl 2xl:text-4xl text-center font-seasons  text-white'>
         Kids enjoy a LIVE, personal conversation<span className=' xl:hidden inline'>.</span> <span className='hidden xl:inline'>with Santa.</span>
         </p>
-        <div  className='button block mx-auto md:flex relative  my-3 justify-end '>
+        <div  className='button block mx-auto md:mx-0 md:flex relative  my-3 justify-end '>
           <button style={{border: '3px solid #D9C999CC', background: 'linear-gradient(176.55deg, #51422F -9.63%, #121212 97.16%)'
 }} className=' md:absolute right-[5em]  xl:right-[3em] 2xl:right-[6em] lg:right-[10em] md:right-[2em]  text-white gap-3 font-seasons text-xl 2xl:text-3xl flex font-bold py-2 px-8 rounded-full'>
          <span style={{background: 'linear-gradient(93.5deg, #D7C798 22.11%, #EDE4CC 54.95%, #D7C798 79.77%)'}} className='flex items-center justify-center rounded-full relative px-2.5 py-2'>
