@@ -4,47 +4,45 @@ import InfoFormWrapper from '../components/InfoFormWrapper';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import Loader from '../components/Loader';
-import { useSearchParams } from 'next/navigation'
 
-  function Info() {
-    const setLoginSession = async (id: string) => {
-      setLoading(true)
-      try {
-        const response = await fetch("/api/loginSession", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id }),
-        });
-        const result = await response.json();
-        if (response.ok) {
-          toast.success(result.message);
-        } else {
-          toast.error(result.message || "An error occurred");
-        }
-      } catch (error) {
-        console.error("Error during API call:", error);
-        toast.error("An unexpected error occurred");
+function Info({ id }: { id?: string }) {
+  const setLoginSession = async (id: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/loginSession", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const result = await response.json();
+      if (response.ok) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message || "An error occurred");
       }
-      setLoading(false)
+    } catch (error) {
+      console.error("Error during API call:", error);
+      toast.error("An unexpected error occurred");
     }
+    setLoading(false);
+  };
+
   const [userInfo, setUserInfo] = useState({ childName: "", parentEmail: "", parentNumber: "" });
-  const [loading, setLoading] = useState(true); // Track loading state
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const id = searchParams.get('id');
 
   useEffect(() => {
     const handleSessionAndUser = async () => {
       if (id) {
         console.log("ID found in query:", id);
-        await setLoginSession(id); // Assume setLoginSession is an async function
+        await setLoginSession(id);
       }
-      getCurrenUser(); // Call this after session logic
+      getCurrenUser();
     };
 
     handleSessionAndUser();
   }, [id]);
- 
+
   const getCurrenUser = async () => {
     try {
       const response = await fetch("/api/currentUser", { method: "GET" });
@@ -57,7 +55,7 @@ import { useSearchParams } from 'next/navigation'
           router.push("/");
           return;
         }
-        setUserInfo(result.user); // Update user info
+        setUserInfo(result.user);
       } else {
         toast.error(result.message || "An error occurred");
       }
@@ -65,18 +63,12 @@ import { useSearchParams } from 'next/navigation'
       console.error("Error during API call:", error);
       toast.error("An unexpected error occurred");
     } finally {
-      setLoading(false); // Mark loading as complete
+      setLoading(false);
     }
   };
 
-
- 
-
- 
-
-  // Render main UI if loading is complete and user info is valid
   return (
-    <section className={`bg-[url('/christmas.jpeg')] bg-cover bg-center bg-no-repeat h-screen w-full px-6 lg:px-6 xl:px-0 py-10 mx-auto relative z-10`}>
+    <section className="bg-[url('/christmas.jpeg')] bg-cover bg-center bg-no-repeat h-screen w-full px-6 lg:px-6 xl:px-0 py-10 mx-auto relative z-10">
       <div
         style={{ background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 50%)' }}
         className="absolute inset-0"
@@ -96,13 +88,7 @@ import { useSearchParams } from 'next/navigation'
           This part makes the call amazing
         </p>
       </div>
-      <div>
-        { loading ? <Loader /> :
-         userInfo.parentEmail && 
-        <InfoFormWrapper />
-        }
-        
-      </div>
+      <div>{loading ? <Loader /> : userInfo.parentEmail && <InfoFormWrapper />}</div>
     </section>
   );
 }
