@@ -436,7 +436,7 @@ function FormTwo() {
           border: "3px solid #a5494d ",
           boxShadow: "0px 0px 40px 0px #D9C99966",
         }}
-        className="w-fit mx-auto font-seasons text-xl my-12 flex justify-center items-center gap-2 text-white font-bold py-3 px-8 rounded-full"
+        className="w-fit mx-auto relative z-10 font-seasons text-xl my-12 flex justify-center items-center gap-2 text-white font-bold py-3 px-8 rounded-full"
       >
         Continue to Checkout <FaArrowRight />
       </button>
