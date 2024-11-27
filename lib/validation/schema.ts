@@ -1,6 +1,7 @@
-import * as z from "zod";
+import * as z from "zod"; // Get today's date in YYYY-MM-DD format
 
 export const step1Schema = z.object({
+  id: z.string(),
     childName: z
     .string()
     .min(1, "Child's name is required")
@@ -40,15 +41,28 @@ export const step2Schema = z.object({
       .min(1, "At least one child is required")
       .max(5, "Maximum of 5 children allowed"),
     callType: z.enum(["Immediate", "Scheduled"], { required_error: "Call type is required" }),
+    scheduledDate: z
+    .string()
+    .nullable() // Allows the field to be empty or undefined
+    ,
+  scheduledTime: z
+    .string()
+    .nullable(), // Default to a random valid time
     
     recipientName: z
     .string()
-    .nullable()
-    .optional()
-    .transform((val) => (val === "" ? null : val)),
-  recipientPhone: z
-    .string()
-    .nullable()
-    .optional()
-    .transform((val) => (val === "" ? null : val)),
-  });
+    .optional() // Allows the field to be empty or undefined
+    .refine(
+      (val) => !val || val.trim().length > 0, // Ensure it's either empty or a non-empty string
+      { message: "Recipient name must be valid if provided" }
+    )
+    .transform((val) => (val ? val.trim() : val)), // Trim if not empty
+    recipientPhone: z
+  .string()
+  .optional() // Allows the field to be empty or undefined
+  .refine(
+    (val) => !val || /^\+?[1-9]\d{9,14}$/.test(val), // Ensure it's either empty or a valid phone number with at least 10 digits
+    { message: "Invalid phone number format. Must be at least 10 digits." }
+  )
+  .transform((val) => (val ? val.trim() : val)), // Trim if not empty
+});

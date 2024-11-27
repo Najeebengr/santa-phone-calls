@@ -23,7 +23,7 @@ const InputField: React.FC<InputFieldProps> = ({ label, type, placeholder, value
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="bg-[#554735] border-[1px] border-[#827E4B] my-2 py-2.5 px-4 text-white placeholder:text-white font-harmonia text-lg font-normal focus:outline-none w-full h-full rounded-full"
+        className="bg-[#554735] border-[1px] border-[#827E4B] my-2 py-2.5 px-4 text-white placeholder:text-white font-harmonia text-lg font-normal focus:outline-none w-full rounded-full"
         {...rest}
       />
     </div>
