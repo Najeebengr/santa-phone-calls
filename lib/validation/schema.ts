@@ -52,10 +52,3 @@ export const step2Schema = z.object({
     .optional()
     .transform((val) => (val === "" ? null : val)),
   });
-  export const step3Schema = z.object({
-    cardNumber: z.string().min(16, "Card number must be 16 digits").max(16, "Card number must be 16 digits"),
-    zipCode: z.string().min(5, "Zip code must be at least 5 characters"),
-    expirationDate: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "Expiration date must be in MM/YY format"),
-    cvv: z.string().min(3, "CVV must be at least 3 characters").max(4, "CVV must be at most 4 characters")
-    
-  });

@@ -63,16 +63,16 @@ function Checkout() {
           <div className="total  my-5">
             <div className="font-harmonia py-2 text-[#FFFFFF80] border-b-[1px] border-white text-xl flex justify-between items-center">
               <p>Talk to Santa</p>
-              <p>{price}</p>
+              <p>${price}</p>
             </div>
             <div className="font-harmonia py-3 text-white text-xl flex justify-between items-center">
               <p>Total</p>
-              <p>{price}</p>
+              <p>${price}</p>
             </div>
           </div>
-           <FormThree />
+           <FormThree price={price} planName={planName} />
 
-          <div className="payment-methods flex flex-col gap-4 my-8">
+          {/* <div className="payment-methods flex flex-col gap-4 my-8">
             <div className="apple">
               <div
                 style={{
@@ -109,7 +109,7 @@ function Checkout() {
                 <span className="w-[180px]">Pay with PayPal</span>
               </div>
             </div>
-          </div>
+          </div> */}
           <div className="terms">
             <p className="text-center font-harmonia text-base md:text-xl text-[#FFFFFF80]">
               By continuing, you agree to the{" "}
@@ -171,7 +171,7 @@ function Checkout() {
                 className=""
               >
                 <p className="text-6xl lg:text-4xl xl:text-6xl border-y-4  border-[#18161433] flex justify-center gap-3 items-center font-semibold font-harmonia text-center py-6 text-[#3A3022]">
-                  {plan.price}{" "}
+                  ${plan.price}{" "}
                   <span className="text-xl font-normal">{plan.per}</span>
                 </p>
               </div>

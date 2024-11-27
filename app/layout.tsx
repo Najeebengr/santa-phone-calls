@@ -6,7 +6,7 @@ import { Toaster } from "react-hot-toast";
 const harmoniaSans = localFont({
   src: [
     {
-      path: "fonts/HarmoniaSansProCyr-Regular.otf", // Absolute path from `public`
+      path: "../public/fonts/HarmoniaSansProCyr-Regular.otf", // Absolute path from `public`
       weight: "300"
     }
   ],
@@ -15,11 +15,11 @@ const harmoniaSans = localFont({
 const theSeasons = localFont({
   src: [
     {
-      path: "fonts/Fontspring-DEMO-theseasons-bd.otf", // Absolute path from `public`
+      path: "../public/fonts/Fontspring-DEMO-theseasons-bd.otf", // Absolute path from `public`
       weight: "900"
     },
     {
-      path: "fonts/Fontspring-DEMO-theseasons-lt.otf", // Absolute path from `public`
+      path: "../public/fonts/Fontspring-DEMO-theseasons-lt.otf", // Absolute path from `public`
       weight: "400"
     }
   ],
