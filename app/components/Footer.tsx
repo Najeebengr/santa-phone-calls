@@ -7,12 +7,12 @@ import { features, MallSantaExperience, MessageFromSanta, PNP, SantaPhoneCalls }
 
 function Footer() {
   return (
-    <footer className='container  px-8 xl:px-0 mx-auto relative md:absolute bottom-8 left-0 right-0'>
+    <footer className='container py-10 md:py-0 px-8 xl:px-0 mx-auto block md:absolute bottom-8 left-0 right-0'>
     <div className='flex pt-12 md:py-0 flex-col md:flex-row justify-center md:justify-between items-center md:items-end '>
-      <div className='text-lg md:text-2xl relative left-0 md:left-0 lg:left-0 xl:-left-6  text-white font-harmonia border-b-2 border-white'>
+      <div className='text-lg md:text-2xl pt-8 md:py-0 block md:relative left-0 md:left-0 lg:left-0 xl:-left-6  text-white font-harmonia border-b-2 border-white'>
 
-      <Dialog>
-      <DialogTrigger>
+      <Dialog >
+      <DialogTrigger className=''>
       <div >
         See How<br className='hidden md:inline'/> {`We're Better?`} 
         <Image 
@@ -143,7 +143,7 @@ function Footer() {
        
        
       </div>
-      <div className='flex relative pt-10 md:pt-0 right-0 md:right-0 lg:right-0 xl:-right-6 flex-col gap-3'>
+      <div className=' block md:relative pt-10 md:pt-0 right-0 md:right-0 lg:right-0 xl:-right-6 flex-col gap-3'>
         <p className='text-md md:text-xl text-white font-harmonia text-center md:text-right'>
             As Seen On...
         </p>
