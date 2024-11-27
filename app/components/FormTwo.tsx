@@ -31,9 +31,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import Loader from "./Loader";
 
 function FormTwo() {
   const [date, setDate] = React.useState<Date>(new Date())
+  const [loading, setLoading] = useState(false);
   // Generate a random time between 08:00 and 20:00
   const randomTime = () => {
     const hour = String(Math.floor(Math.random() * (20 - 8 + 1) + 8)).padStart(2, "0"); // Random hour (08-20)
@@ -108,7 +110,7 @@ function FormTwo() {
     }
   }, [errors]);
   const onSubmit = async (data: z.infer<typeof step2Schema>) => {
-
+   setLoading(true);
     try {
       const apiEndpoint = '/api/childRegister';
       const result = await fetch(apiEndpoint, {
@@ -171,46 +173,10 @@ function FormTwo() {
       console.error('Error during submission:', err);
       toast.error('An unexpected error occurred while sending data to GHL');
     } finally {
-
+      setLoading(false);
     }
   };
-  // const onSubmit = async (data: z.infer<typeof step2Schema>) => {
-  //   try {
-  //     const apiEndpoint =
-  //       "https://services.leadconnectorhq.com/hooks/jyPDXTf3YpjI9G74bRCW/webhook-trigger/48f8b837-7d75-43db-aace-7898714ff597";
-
-  //     const payload = {
-  //       children: data.children,
-  //       callType: data.callType,
-  //       recipientName: data.recipientName,
-  //       recipientPhone: data.recipientPhone,
-  //       scheduledDate: date,
-  //       scheduledTime: data.scheduledTime,
-  //       tags: ["Santa Call", "Multiple Children"],
-  //     };
-  //     console.log("Payload:", payload);
-  //     const result = await fetch(apiEndpoint, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(payload),
-  //     });
-
-  //     const response = await result.json();
-
-  //     if (result.ok) {
-  //       console.log("GHL Response:", response);
-  //       toast.success("Thanks for Providing Data! Let's Proceed with Payment!");
-  //       router.push("/checkout");
-  //     } else {
-  //       console.error("GHL Error Response:", response);
-  //       toast.error(response.message || "Failed to submit data to GHL.");
-  //     }
-  //   } catch (err) {
-  //     console.error("Error during submission:", err);
-  //     toast.error("An unexpected error occurred.");
-  //   }
-  // };
-
+ if(loading) return <Loader />
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="text-white">
       {fields.map((child, index) => (
