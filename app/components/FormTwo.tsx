@@ -35,9 +35,10 @@ import Loader from "./Loader";
 
 function FormTwo() {
   const [date, setDate] = React.useState<Date>(new Date())
-  const [gender, setGender] = useState("Male");
+
   const [loading, setLoading] = useState(false);
   const [disabledSlots, setDisabledSlots] = useState<string[]>([]);
+  const [userInfo, setUserInfo] = useState({ childName: '', parentEmail: '', parentNumber: '' });
   // Generate a random time between 08:00 and 20:00
   const randomTime = () => {
     const hour = String(Math.floor(Math.random() * (20 - 8 + 1) + 8)).padStart(2, "0"); // Random hour (08-20)
@@ -81,6 +82,28 @@ function FormTwo() {
     control,
     name: "children",
   });
+  const getCurrentUser = async () => {
+    try {
+      const response = await fetch('/api/currentUser', { method: 'GET' });
+      const result = await response.json();
+
+      if (response.ok) {
+        
+        setUserInfo(result.user);
+        console.log('user ha', result.user);
+      } else {
+        toast.error(result.message || 'An error occurred');
+      }
+    } catch (error) {
+      console.error('Error during API call:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+    
+    }
+  };
+  useEffect(() => {
+     getCurrentUser();
+  }, []);
   const fetchDisabledSlots = async (date: string) => {
     try {
       const response = await fetch("/api/checkBookedSlots", {
@@ -170,7 +193,7 @@ function FormTwo() {
             },
             children: data.children.map((child) => ({
               name: child.name,
-              gender: gender,
+              gender: child.gender,
               age: child.age,
               connections: child.connections || null,
               details: child.details || null,
@@ -238,13 +261,24 @@ function FormTwo() {
               </div>
             </div>
           )}
-
-          <InputField
+          {
+            index === 0 ? (
+              <InputField
+              type="text"
+              label="Child’s Name"
+              disabled
+              value={userInfo.childName}
+              placeholder="Child's Name"
+              {...register(`children.${index}.name`)}
+            />
+            ) : <InputField
             type="text"
             label="Child’s Name"
             placeholder="Child's Name"
             {...register(`children.${index}.name`)}
           />
+          }
+          
           <div className="my-2 gap-5 flex items-center justify-between">
             <div className="basis-[95%]">
               <label

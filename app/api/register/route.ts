@@ -47,10 +47,13 @@ export async function POST(req: NextRequest) {
     // Insert into childrenTable
     const child = await db.insert(childrenTable).values(childData).returning();
     console.log("Child inserted:", child);
-
+    const sessionData = {
+      ...user[0], // Include existing user data
+      childName: child[0].childName, // Add the inserted child's name
+    };
     // Create session
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    const session = JSON.stringify(user[0]);
+    const session = JSON.stringify(sessionData);
     const cookieStore = cookies();
 
     await (await cookieStore).set("session", session, {
