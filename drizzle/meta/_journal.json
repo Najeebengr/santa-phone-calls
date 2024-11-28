@@ -57,6 +57,13 @@
       "when": 1732734487207,
       "tag": "0007_pink_ego",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1732752464942,
+      "tag": "0008_curvy_grey_gargoyle",
+      "breakpoints": true
     }
   ]
 }

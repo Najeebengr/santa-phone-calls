@@ -100,7 +100,7 @@ function FormOne() {
     )
   }
   return (
-    <form  onSubmit={handleSubmit(onSubmit)}   className='flex pb-10 md:pb-0 px-6 md:px-0  flex-col gap-4 justify-center'>
+    <form  onSubmit={handleSubmit(onSubmit)}   className='flex pb-10 md:pb-0  md:px-0  flex-col gap-4 justify-center'>
         <div style={{background: 'linear-gradient(92.63deg, #D7C798 34.94%, #EDE4CC 53.8%, #D7C798 78.45%)'}} className='w-full text-xl rounded-full px-2 py-2 flex gap-2 justify-center  items-center   mx-auto lg:w-[30%] md:w-[40%]'>
         <Image
         src = '/person.svg'

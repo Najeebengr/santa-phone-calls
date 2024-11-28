@@ -30,7 +30,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate and fetch the user
     const user = await db.select().from(usersTable).where(eq(usersTable.id, userId));
     if (!user || user.length === 0) {
       return NextResponse.json(
@@ -44,6 +43,24 @@ export async function POST(req: NextRequest) {
     if (!Array.isArray(parsedData.children) || parsedData.children.length === 0) {
       return NextResponse.json(
         { message: "Invalid children data: must be a non-empty array" },
+        { status: 400 }
+      );
+    }
+
+    // Check for conflicting slots
+    const conflictingBooking = await db
+      .select()
+      .from(usersTable)
+      .where(
+        and(
+          eq(usersTable.scheduledDate, parsedData.scheduledDate),
+          eq(usersTable.scheduledTime, parsedData.scheduledTime)
+        )
+      );
+
+    if (conflictingBooking.length > 0) {
+      return NextResponse.json(
+        { message: "Slot already booked. Please choose a different time." },
         { status: 400 }
       );
     }
@@ -71,7 +88,6 @@ export async function POST(req: NextRequest) {
 
       console.log("Cleaned Child Data:", childData);
 
-      // Check for existing child with the same `userId` and `childName`
       const existingChild = await db
         .select()
         .from(childrenTable)
@@ -80,11 +96,9 @@ export async function POST(req: NextRequest) {
         );
 
       if (existingChild.length > 0) {
-        // Update the existing child
         await db.update(childrenTable).set(childData).where(eq(childrenTable.id, existingChild[0].id));
         console.log(`Child ${childName} updated`);
       } else {
-        // Insert a new child entry
         await db.insert(childrenTable).values(childData).returning();
         console.log(`Child ${childName} inserted`);
       }
@@ -108,15 +122,13 @@ export async function POST(req: NextRequest) {
     console.log("User updated:", updatedUser);
 
     return NextResponse.json({ message: "Data processed successfully", user: updatedUser[0] });
-  } 
-  // @typescript-eslint/no-explicit-any
-  catch (error: unknown) {
+  } catch (error: unknown) {
     if (error instanceof Error) {
-    console.error("An error occurred:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error", error: error.message },
-      { status: 500 }
-    );
+      console.error("An error occurred:", error);
+      return NextResponse.json(
+        { message: "Internal Server Error", error: error.message },
+        { status: 500 }
+      );
+    }
   }
-}
 }

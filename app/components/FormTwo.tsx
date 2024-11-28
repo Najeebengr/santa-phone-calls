@@ -35,7 +35,9 @@ import Loader from "./Loader";
 
 function FormTwo() {
   const [date, setDate] = React.useState<Date>(new Date())
+  const [gender, setGender] = useState("Male");
   const [loading, setLoading] = useState(false);
+  const [disabledSlots, setDisabledSlots] = useState<string[]>([]);
   // Generate a random time between 08:00 and 20:00
   const randomTime = () => {
     const hour = String(Math.floor(Math.random() * (20 - 8 + 1) + 8)).padStart(2, "0"); // Random hour (08-20)
@@ -49,6 +51,7 @@ function FormTwo() {
   const {
     register,
     control,
+    setValue,
     handleSubmit,
     formState: { errors },
   } = useForm<z.infer<typeof step2Schema>>({
@@ -78,7 +81,34 @@ function FormTwo() {
     control,
     name: "children",
   });
-
+  const fetchDisabledSlots = async (date: string) => {
+    try {
+      const response = await fetch("/api/checkBookedSlots", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ date }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        return data.bookedSlots.map((slot: { scheduledTime: string }) => slot.scheduledTime);
+      } else {
+        console.error("Failed to fetch disabled slots");
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching disabled slots:", error);
+      return [];
+    }
+  };
+  useEffect(() => {
+    if (date) {
+      const formattedDate = format(date, "yyyy-MM-dd");
+      fetchDisabledSlots(formattedDate).then(setDisabledSlots);
+    }
+  }, [date]);
   const addAnotherChild = () => {
     if (fields.length >= 5) {
       toast.error("You can add a maximum of 5 children.");
@@ -140,7 +170,7 @@ function FormTwo() {
             },
             children: data.children.map((child) => ({
               name: child.name,
-              gender: child.gender,
+              gender: gender,
               age: child.age,
               connections: child.connections || null,
               details: child.details || null,
@@ -225,10 +255,9 @@ function FormTwo() {
               </label>
               <Select
                 defaultValue="Male"
-                onValueChange={(value) =>
-                  handleSubmit((values) => {
-                    values.children[index].gender = value as "Male" | "Female";
-                  })
+                onValueChange={(value) => {
+                  setValue(`children.${index}.gender`, value as ("Male" | "Female")); 
+                }
                 }
               >
                 <SelectTrigger className="bg-[#554735] border-[1px] border-[#827E4B] my-2 py-2 px-4 text-white placeholder:text-white font-harmonia text-lg font-normal focus:outline-none w-full h-full rounded-full">
@@ -357,7 +386,8 @@ function FormTwo() {
         <Select
           onValueChange={(value) =>{
             setDate(addDays(new Date(), parseInt(value)))
-            console.log(date)
+            setValue(`scheduledDate`, value);
+            console.log('yeah',date)
           }
         }
         >
@@ -376,7 +406,17 @@ function FormTwo() {
   defaultMonth={date}
   mode="single"
   selected={date}
-  onSelect={(day) => day && setDate(day)}
+  onSelect={(day) => {
+    if (day) {
+      setDate(day); // Update the local `date` state
+      setValue("scheduledDate", day.toString()); // Set the `scheduledDate` in form state
+      console.log("Calendar Selected Date:", day); // Debugging log
+    }
+  }}
+  disabled={(day) => {
+    const formattedDate = format(day, "yyyy-MM-dd");
+    return disabledSlots.includes(formattedDate); // Disable if in the disabled slots
+  }}
 />
         </div>
       </PopoverContent>
@@ -436,7 +476,7 @@ function FormTwo() {
           border: "3px solid #a5494d ",
           boxShadow: "0px 0px 40px 0px #D9C99966",
         }}
-        className="w-fit mx-auto relative z-10 font-seasons text-xl my-12 flex justify-center items-center gap-2 text-white font-bold py-3 px-8 rounded-full"
+        className="w-fit mx-auto relative z-10 font-seasons text-base md:text-xl my-12 flex justify-center items-center gap-2 text-white font-bold py-3 px-8 rounded-full"
       >
         Continue to Checkout <FaArrowRight />
       </button>
