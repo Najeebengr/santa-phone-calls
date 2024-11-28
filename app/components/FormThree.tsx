@@ -1,71 +1,117 @@
-'use client'
-import React from 'react'
+'use client';
+
+import React from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-
 import CheckoutPage from './CheckoutPage';
 import convertToSubCurrency from '../lib/convertToSubCurrency';
-if(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY === undefined){
-  throw new Error('Stripe public key is not defined')
+import type { Child } from '@/lib/validation/schema';
+
+// Ensure stripe key exists
+if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
+  throw new Error('Stripe public key is not defined');
 }
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
-function FormThree({price, planName}: {price: number, planName: string}) {
-    
- 
 
-  return (
-    <div >
-      <Elements 
-      stripe={stripePromise}
-  
-      options={{
-        mode: "payment",
-        amount: convertToSubCurrency(price),
-        currency: "usd",
-      
-        appearance: {
-          theme: "night",
-          variables: {
-            
-            // borderRadius: "9999px",
-            colorBackground: "#554735",
-            colorText: "#FFFFFF",
-            colorTextPlaceholder: "#FFFFFF80",
-            // colorPlaceholder: "#FFFFFF80",
-            // fontFamily: "'Seasons', sans-serif",
-            colorPrimary: '#ffffff',
-            fontSizeBase: "18px",
-          },
-          rules: {
-            ".Input": {
-              borderRadius: "9999px",
-              border: "1px solid #827E4B",
-              padding: "10px 30px",
-              focus: "outline-none",
-              active: "outline-none",
-              color: "#FFFFFF",
-              fontFamily: "'Harmonia, sans-serif",
-              fontSize: "18px",
-              backgroundColor: "#554735",
-             
-            },
-            ".Span": {
-              color: "#FFFFFF",
-            },
-            ".Label": {
-              color: "#FFFFFF",
-              // fontFamily: "'Seasons', sans-serif",
-            },
-          },
-        },
-      }}
-      >
-        <CheckoutPage packageName={planName} totalAmount={price} />
-      </Elements> 
-       
-    </div>
-  )
+interface FormThreeProps {
+  // Package Info
+  id: string;
+  price: number;
+  planName: string;
+  planId: number;
+  hasRecording: boolean;
+
+  // Form Data from localStorage
+  selectedSlot: string;
+  selectedTimezone: string;
+  parentEmail: string;
+  parentPhone: string;
+  parentName: string;
+  children: Array<Child>;
+  callNow: boolean;
+  when?: number | null;
+  recipientName?: string;
+  recipientPhone?: string;
 }
 
-export default FormThree
+interface CheckoutPageProps {
+  id: string;
+  packageName: string;
+  totalAmount: number;
+  planId: number;
+  hasRecording: boolean;
+  selectedSlot: string;
+  selectedTimezone: string;
+  parentEmail: string;
+  parentPhone: string;
+  parentName: string;
+  children: Array<Child>;
+  callNow: boolean;
+  when?: number | null;
+  recipientName?: string;
+  recipientPhone?: string;
+}
+
+function FormThree(props: FormThreeProps) {
+  // Map props to match CheckoutPage requirements
+  const checkoutProps: CheckoutPageProps = {
+    id: props.id,
+    packageName: props.planName,
+    totalAmount: props.price,
+    planId: props.planId,
+    hasRecording: props.hasRecording,
+    selectedSlot: props.selectedSlot,
+    selectedTimezone: props.selectedTimezone,
+    parentEmail: props.parentEmail,
+    parentPhone: props.parentPhone,
+    parentName: props.parentName,
+    children: props.children,
+    callNow: props.callNow,
+    when: props.when,
+    recipientName: props.recipientName,
+    recipientPhone: props.recipientPhone,
+  };
+
+  return (
+    <div>
+      <Elements
+        stripe={stripePromise}
+        options={{
+          mode: "payment",
+          amount: convertToSubCurrency(props.price),
+          currency: "usd",
+          appearance: {
+            theme: "night",
+            variables: {
+              colorBackground: "#554735",
+              colorText: "#FFFFFF",
+              colorTextPlaceholder: "#FFFFFF80",
+              colorPrimary: '#ffffff',
+              fontSizeBase: "18px",
+            },
+            rules: {
+              ".Input": {
+                borderRadius: "9999px",
+                border: "1px solid #827E4B",
+                padding: "10px 30px",
+                focus: "outline-none",
+                active: "outline-none",
+                color: "#FFFFFF",
+                fontFamily: "'Harmonia, sans-serif'",
+                fontSize: "18px",
+                backgroundColor: "#554735",
+              },
+              ".Span": { color: "#FFFFFF" },
+              ".Label": { color: "#FFFFFF" },
+            },
+          },
+        }}
+      >
+        <CheckoutPage {...checkoutProps} />
+      </Elements>
+    </div>
+  );
+}
+
+export default FormThree;

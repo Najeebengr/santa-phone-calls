@@ -28,7 +28,7 @@ export const features = [
   },
   {
     id: 3,
-    name: 'Magical Caller ID: “Santa’s House”'
+    name: 'Magical Caller ID: “Santa&lsquo;s House”'
   },
   {
     id: 4,
@@ -70,7 +70,7 @@ export const SantaPhoneCalls = [
   },
   {
     id: 2,
-    name: '(Child’s Details Adapted)'
+    name: '(Child&lsquo;s Details Adapted)'
   },
   {
     id: 3,
@@ -281,6 +281,7 @@ export const MessageFromSanta = [
     }
   ]
   export const plans: Plan[] = [
-    { id: 1, name: "Talk to Santa", description: 'A one-time, personalized call from Santa, perfect for creating a magical moment that will surprise your child or loved one with joyful holiday cheer they’ll remember forever.', price: 9.95, per: '/ Call' },
-    { id: 2, name: "Includes Recording", description: 'A five-minute personalized call from Santa, including a special recording so you can relive the magic and cherished memories of this moment for years to come.', price: 14.95, per: '/ Recording' },
+    { id: 1, name: "Talk to Santa", description: 'A one-time, personalized call from Santa, perfect for creating a magical moment that will surprise your child or loved one with joyful holiday cheer they’ll remember forever.', price: 9.95, per: '/ Call', hasRecording: false },
+    { id: 2, name: "Includes Recording", description: 'A five-minute personalized call from Santa, including a special recording so you can relive the magic and cherished memories of this moment for years to come.', price: 14.95, per: '/ Recording', hasRecording: true },
+    { id: 3, name: "Santa's Family Bundle", description: 'A one-time, personalized call from Santa for the whole family, creating a magical moment that fills everyone with joyful holiday cheer they’ll remember forever.', price: 19.95, per: '/ Call', hasRecording: false },
   ];

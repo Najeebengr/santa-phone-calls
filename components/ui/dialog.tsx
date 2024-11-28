@@ -33,6 +33,16 @@ const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
+  // Ensure there's a DialogTitle among children
+  const hasDialogTitle = React.Children.toArray(children).some(
+    child => React.isValidElement(child) && child.type === DialogTitle
+  );
+
+  if (!hasDialogTitle) {
+    console.warn(
+      'DialogContent should contain a DialogTitle component for accessibility.'
+    );
+  }
   
   return (
   <DialogPortal>

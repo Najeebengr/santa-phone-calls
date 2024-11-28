@@ -1,41 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
- // Replace with your actual bookings table
-import { eq } from "drizzle-orm";
-import { bookingsTable } from "@/db/schema/bookings";
+
+const GHL_API_KEY = process.env.GHL_API_KEY;
+const GHL_CALENDAR_ID = process.env.GHL_CALENDAR_ID;
+const DEFAULT_TIMEZONE = "America/New_York";
 
 export async function POST(req: NextRequest) {
   try {
-    const { date } = await req.json(); // Date in YYYY-MM-DD format
-    if (!date) {
-      return NextResponse.json(
-        { message: "Date is required" },
-        { status: 400 }
-      );
+    const { timezone = DEFAULT_TIMEZONE } = await req.json();
+
+    // Get current date and 7 days from now in epoch timestamps
+    const startDate = Date.now();
+    const endDate = startDate + (20 * 24 * 60 * 60 * 1000);
+
+    console.log('Start date:', startDate);
+    console.log('End date:', endDate);
+
+    const apiUrl = `https://rest.gohighlevel.com/v1/appointments/slots?calendarId=${GHL_CALENDAR_ID}&startDate=${startDate}&endDate=${endDate}&timezone=${timezone}`;
+
+    console.log('Making GHL API request to:', apiUrl);
+
+    const ghlResponse = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${GHL_API_KEY}`,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!ghlResponse.ok) {
+      const errorText = await ghlResponse.text();
+      console.error('GHL API error response:', errorText);
+      throw new Error(`GHL API error: ${ghlResponse.statusText}\nDetails: ${errorText}`);
     }
 
-    // Query the database for booked slots on the given date
-    const bookedSlots = await db
-      .select({
-        scheduledTime: bookingsTable.scheduledTime,
-      })
-      .from(bookingsTable)
-      .where(eq(bookingsTable.scheduledDate, date));
+    const ghlData = await ghlResponse.json();
+    console.log('GHL API response:', JSON.stringify(ghlData, null, 2));
 
-    // Extract times from the results
-    const disabledTimes = bookedSlots.map((slot) => slot.scheduledTime);
+    // Calculate total available slots
+    const totalSlots = Object.values(ghlData).reduce((total: number, day: any) => total + day.slots.length, 0);
+    console.log('Total available slots:', totalSlots);
 
-    return NextResponse.json({
-      disabledTimes,
-    });
-  } 
-  catch (error: unknown) {
-    if(error instanceof Error) {
-    console.error("Error fetching booked slots:", error);
+    // Format the response
+    const response = {
+      availableSlots: ghlData,
+      totalAvailableSlots: totalSlots
+    };
+
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error('Error in checkBookedSlots:', error);
     return NextResponse.json(
-      { message: "Internal Server Error", error: error.message },
+      { error: 'Failed to fetch available slots' },
       { status: 500 }
     );
   }
-}
 }

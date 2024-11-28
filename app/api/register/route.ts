@@ -3,6 +3,7 @@ import { usersTable } from "@/db/schema/user";
 import { childrenTable } from "@/db/schema/children";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { eq } from 'drizzle-orm';
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,15 +17,28 @@ export async function POST(req: NextRequest) {
       childName: parsedData.childName,
     };
 
-    console.log("Inserting data into usersTable...");
+    // Check if user already exists
+    const existingUser = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.parentEmail, userData.parentEmail))
+      .limit(1);
 
-    // Insert into usersTable
-    const user = await db.insert(usersTable).values(userData).returning();
-    console.log("User inserted:", user);
+    let user;
+    if (existingUser.length > 0) {
+      // User exists, use their data
+      user = existingUser;
+      console.log("Existing user found:", user);
+    } else {
+      // Insert new user
+      console.log("Inserting data into usersTable...");
+      user = await db.insert(usersTable).values(userData).returning();
+      console.log("User inserted:", user);
+    }
 
     if (user.length === 0) {
       return NextResponse.json(
-        { message: "Failed to register user" },
+        { message: "Failed to process user" },
         { status: 500 }
       );
     }
@@ -33,9 +47,9 @@ export async function POST(req: NextRequest) {
 
     // Prepare child data
     const childData = {
-      userId, // Reference ID to the user
+      userId,
       childName: parsedData.childName,
-      age: null, // Placeholder for other fields
+      age: null,
       gender: null,
       connections: null,
       details: null,
@@ -47,10 +61,12 @@ export async function POST(req: NextRequest) {
     // Insert into childrenTable
     const child = await db.insert(childrenTable).values(childData).returning();
     console.log("Child inserted:", child);
+    
     const sessionData = {
-      ...user[0], // Include existing user data
-      childName: child[0].childName, // Add the inserted child's name
+      ...user[0],
+      childName: child[0].childName,
     };
+    
     // Create session
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const session = JSON.stringify(sessionData);
@@ -62,25 +78,17 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({
-      message: "User registered successfully",
+      message: existingUser.length > 0 ? "Welcome back!" : "User registered successfully",
       user,
       child,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
-    console.error("An error occurred:", error);
-
-    if ("code" in error && error.code === "23505") {
+      console.error("An error occurred:", error);
       return NextResponse.json(
-        { message: "Already exists, Use emailed link to step forward" },
-        { status: 400 }
+        { message: "Internal Server Error" },
+        { status: 500 }
       );
     }
-
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
   }
-}
 }

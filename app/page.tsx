@@ -5,14 +5,15 @@ import HomePageWrapper from "./components/HomePageWrapper";
 
 export default function Home() {
   return (
-    <section className="bg-[url('/santa.jpeg')] bg-cover bg-center bg-no-repeat h-full md:h-screen  w-full ">
-      <Header />
-      {/* <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black-400 to-transparent"></div> */}
-    <main>
-      <HomePageWrapper />
-      <Footer />
-      
-    </main>
+    <section className="relative bg-[url('/santa.jpeg')] bg-cover bg-center bg-no-repeat h-full md:h-screen w-full">
+      <div className="absolute inset-0 bg-black/30" aria-hidden="true"></div>
+      <div className="relative z-10">
+        <Header />
+        <main>
+          <HomePageWrapper />
+          <Footer />
+        </main>
+      </div>
     </section>
   );
 }

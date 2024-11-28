@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import InfoFormWrapper from '../components/InfoFormWrapper';
 import toast from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -8,21 +8,10 @@ import Loader from '../components/Loader';
 
 function Info() {
   const searchParams = useSearchParams();
-  const id = searchParams.get('id'); // Extract `id` query parameter
+  const id = searchParams.get('id');
   const [userInfo, setUserInfo] = useState({ childName: '', parentEmail: '', parentNumber: '' });
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-
-  useEffect(() => {
-    const handleSessionAndUser = async () => {
-      if (id) {
-        await setLoginSession(id);
-      }
-      await getCurrenUser();
-    };
-
-    handleSessionAndUser();
-  }, [id]);
 
   const setLoginSession = async (id: string) => {
     setLoading(true);
@@ -45,7 +34,7 @@ function Info() {
     setLoading(false);
   };
 
-  const getCurrenUser = async () => {
+  const getCurrenUser = useCallback(async () => {
     try {
       const response = await fetch('/api/currentUser', { method: 'GET' });
       const result = await response.json();
@@ -66,10 +55,21 @@ function Info() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]); // Include router in dependencies since it's used inside the function
+
+  useEffect(() => {
+    const handleSessionAndUser = async () => {
+      if (id) {
+        await setLoginSession(id);
+      }
+      await getCurrenUser();
+    };
+
+    handleSessionAndUser();
+  }, [id, getCurrenUser]);
 
   return (
-    <section className="bg-[url('/christmas.jpeg')] bg-cover bg-center bg-no-repeat h-screen w-full px-6 lg:px-6 xl:px-0 py-10 mx-auto relative z-10">
+    <section className="bg-[url('/christmas.jpeg')] bg-cover bg-center bg-no-repeat min-h-screen w-full px-6 lg:px-6 xl:px-0 py-10 mx-auto relative z-10">
       <div className="relative z-30">
         <h2 className="text-4xl md:text-6xl 2xl:text-7xl font-black text-center font-seasons text-white">
           Personalize the Conversation

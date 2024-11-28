@@ -1,6 +1,6 @@
 import React from 'react'
-import Image from 'next/image'
 import FormOne from './FormOne'
+import AudioPlayer from './audio-player'
 function HomePageWrapper() {
   return (
     <div className='container  my-6 h-full md:h-[70vh]  justify-between mx-auto flex flex-col gap-28 md:gap-4'>
@@ -13,22 +13,12 @@ function HomePageWrapper() {
         Kids enjoy a LIVE, personal conversation<span className=' xl:hidden inline'>.</span> <span className='hidden xl:inline'>with Santa.</span>
         </p>
         <div  className='button block mx-auto md:mx-0 md:flex relative  my-3 justify-end '>
-          <button style={{border: '3px solid #D9C999CC', background: 'linear-gradient(176.55deg, #51422F -9.63%, #121212 97.16%)'
-}} className=' md:absolute right-[5em]  xl:right-[3em] 2xl:right-[6em] lg:right-[10em] md:right-[2em]  text-white gap-3 font-seasons text-xl 2xl:text-3xl flex font-bold py-2 px-8 rounded-full'>
-         <span style={{background: 'linear-gradient(93.5deg, #D7C798 22.11%, #EDE4CC 54.95%, #D7C798 79.77%)'}} className='flex items-center justify-center rounded-full relative px-2.5 py-2'>
-         <Image
-          src = '/play.svg'
-          width = {13}
-          height = {10}
-          alt = "play"
-          className='relative -right-0.5'  
-          />
-         </span>
-          
-          Listen to a Call
-          </button>
+     
+           <div className='md:absolute right-[5em] xl:right-[3em] 2xl:right-[6em] lg:right-[10em] md:right-[2em]'>
+          <AudioPlayer />
         </div>
-      </div>
+        </div>
+        </div>
       <div className='form px-6 md:px-0'>
         <FormOne />
       </div>

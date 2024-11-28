@@ -38,3 +38,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+%HOMEPATH%/.ssh/replit
+%HOMEPATH%/.ssh/replit.pub
+tracking.md

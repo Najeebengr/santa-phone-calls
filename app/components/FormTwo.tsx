@@ -1,17 +1,21 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { FaArrowRight } from "react-icons/fa";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus } from 'lucide-react';
 import { useRouter } from "next/navigation";
-import { step2Schema } from "@/lib/validation/schema";
-import { z } from "zod";
+import { generateId, step2Schema, type Step2FormData } from "@/lib/validation/schema";
 import InputField from "./InputField";
 import { FieldErrors } from "react-hook-form";
 import "react-datepicker/dist/react-datepicker.css";
 import TextAreaField from "./TextAreaField";
+import { CustomCalendar } from "../components/custom-calendar";
+import type { CheckoutPageProps as CheckoutData } from './types/checkout';
+import { plans } from "../lib/constants" 
+import { Plan } from "../lib/types" 
 import {
   Select,
   SelectTrigger,
@@ -19,35 +23,21 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-
-import { addDays, format } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
-
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import Loader from "./Loader";
 
 function FormTwo() {
-  const [date, setDate] = React.useState<Date>(new Date())
-
-  const [loading, setLoading] = useState(false);
-  const [disabledSlots, setDisabledSlots] = useState<string[]>([]);
-  const [userInfo, setUserInfo] = useState<string | null>(null);
-  // Generate a random time between 08:00 and 20:00
-  const randomTime = () => {
-    const hour = String(Math.floor(Math.random() * (20 - 8 + 1) + 8)).padStart(2, "0"); // Random hour (08-20)
-    const minute = String(Math.floor(Math.random() * 60)).padStart(2, "0"); // Random minute (00-59)
-    return `${hour}:${minute}`;
-  };
   const router = useRouter();
+  const [date, setDate] = React.useState<Date>(new Date());
+  const [loading, setLoading] = useState(false);
+  const [userInfo, setUserInfo] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
   const [sendAsGift, setSendAsGift] = useState(false);
-  const [isScheduled, setIsScheduled] = useState(false); // State to toggle schedule inputs
+  const [isScheduled, setIsScheduled] = useState(false);
+  const [parentData, setParentData] = useState<{ 
+    parentName: string;
+    parentEmail: string;
+    parentPhone: string;
+  } | null>(null);
 
   const {
     register,
@@ -55,11 +45,14 @@ function FormTwo() {
     setValue,
     handleSubmit,
     formState: { errors },
-  } = useForm<z.infer<typeof step2Schema>>({
+  } = useForm<Step2FormData>({
     resolver: zodResolver(step2Schema),
     defaultValues: {
+      id: generateId(),
       children: [
         {
+          id: generateId(), // Add id here
+
           name: "",
           gender: "Male",
           age: 1,
@@ -71,173 +64,385 @@ function FormTwo() {
       callType: "Immediate",
       recipientName: "",
       recipientPhone: "",
-      scheduledDate: date.toString(), // Default to today's date
-    scheduledTime: randomTime(), // Default to a random time
+      scheduledDate: new Date().toString(),
+      scheduledTime: randomTime(),
     },
   });
-
-  console.log(errors);
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "children",
   });
-  const getCurrentUser = async () => {
-    try {
-      const response = await fetch('/api/currentUser', { method: 'GET' });
-      const result = await response.json();
 
-      if (response.ok) {
-        
-        setUserInfo(result.user.childName || "Default Name");
-      } else {
-        toast.error(result.message || 'An error occurred');
+  function randomTime(): string {
+    const hour = String(Math.floor(Math.random() * (20 - 8 + 1) + 8)).padStart(2, "0");
+    const minute = String(Math.floor(Math.random() * 60)).padStart(2, "0");
+    return `${hour}:${minute}`;
+  }
+
+  const getCurrentUser = () => {
+    try {
+      const storedData = localStorage.getItem('userFormData');
+      if (!storedData) {
+        toast.error('Please complete step 1 first');
+        router.push('/');
+        return;
       }
+
+      const userData = JSON.parse(storedData);
+      setParentData(userData);
+      // Remove the following lines:
+      // setUserInfo(userData.childName || "");
+      // setValue("children.0.name", userData.childName);
     } catch (error) {
-      console.error('Error during API call:', error);
+      console.error('Error retrieving user data:', error);
       toast.error('An unexpected error occurred');
-    } finally {
-    
     }
   };
+
   useEffect(() => {
-    if (userInfo) {
-      console.log("Setting userInfo to children[0].name:", userInfo);
-      setValue("children.0.name", userInfo);
-    }
-  }, [userInfo, setValue]);
-  useEffect(() => {
-     getCurrentUser();
-     console.log("User Info Child Name:", userInfo);
+    getCurrentUser();
   }, []);
-  const fetchDisabledSlots = async (date: string) => {
-    try {
-      const response = await fetch("/api/checkBookedSlots", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ date }),
-      });
-  
-      if (response.ok) {
-        const data = await response.json();
-        return data.bookedSlots.map((slot: { scheduledTime: string }) => slot.scheduledTime);
-      } else {
-        console.error("Failed to fetch disabled slots");
-        return [];
-      }
-    } catch (error) {
-      console.error("Error fetching disabled slots:", error);
-      return [];
-    }
-  };
-  useEffect(() => {
-    if (date) {
-      const formattedDate = format(date, "yyyy-MM-dd");
-      fetchDisabledSlots(formattedDate).then(setDisabledSlots);
-    }
-  }, [date]);
-  const addAnotherChild = () => {
-    if (fields.length >= 5) {
-      toast.error("You can add a maximum of 5 children.");
-      return;
-    }
-    append({
-      name: "",
-      gender: "Male",
-      age: 1,
-      connections: "",
-      details: "",
-      hobbies: "",
-    });
-  };
 
   useEffect(() => {
-    const displayErrors = (errors: FieldErrors) => {
-      Object.entries(errors).forEach(([field, error]) => {
-        if (error && typeof error === "object" && "message" in error) {
-          toast.error(`${field}: ${(error as { message: string }).message}`);
-        } else if (typeof error === "object" && error !== null) {
-          displayErrors(error as FieldErrors);
-        }
-      });
-    };
-
     if (Object.keys(errors).length > 0) {
+      const displayErrors = (errors: FieldErrors<Step2FormData>) => {
+        Object.entries(errors).forEach(([field, error]) => {
+          if (error && 'message' in error) {
+            toast.error(`${field}: ${error.message}`);
+          } else if (error && typeof error === 'object') {
+            displayErrors(error as FieldErrors<Step2FormData>);
+          }
+        });
+      };
       displayErrors(errors);
     }
   }, [errors]);
-  const onSubmit = async (data: z.infer<typeof step2Schema>) => { 
-   setLoading(true);
-   
-  console.log("data", data);
-    try {
-      const apiEndpoint = '/api/childRegister';
-      const result = await fetch(apiEndpoint, {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-  
-      const response = await result.json();
-      if (result.ok) {
-        console.log("Response:", response);
-        toast.success(response.message);
-  
-        // Use the ID directly without relying on React's state update
-        
-  
-        // Send user data to the external API
-        const ghlEndpoint =
-          'https://services.leadconnectorhq.com/hooks/jyPDXTf3YpjI9G74bRCW/webhook-trigger/5ddab513-02ef-4d16-8ce3-c8d1f98b6985';
-          const payload = {
-            user: {
-              callType: data.callType,
-              scheduledDate: data.scheduledDate,
-              scheduledTime: data.scheduledTime,
-              recipientName: data.recipientName || null,
-              recipientPhone: data.recipientPhone || null,
-            },
-            children: data.children.map((child) => ({
-              name: child.name,
-              gender: child.gender,
-              age: child.age,
-              connections: child.connections || null,
-              details: child.details || null,
-              hobbies: child.hobbies || null,
-            })),
-            tags: ["Santa Call", "Multiple Children"], // Include tags if necessary
-          };
-    
-  
-        const ghlResult = await fetch(ghlEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-  
-        const ghlResponse = await ghlResult.json();
-        if (ghlResult.ok) {
-          console.log('GHL Response:', ghlResponse);
-          // toast.success('Contact added successfully!');
-          router.push('/checkout');
-        } else {
-          console.error('GHL Error Response:', ghlResponse);
-          toast.error(ghlResponse.message || 'Failed to add contact to GHL');
-        }
-      } else {
-        toast.error(response.message || "An error occurred");
-        router.replace('/');
-      }
-    } catch (err) {
-      console.error('Error during submission:', err);
-      toast.error('An unexpected error occurred while sending data to GHL');
-    } finally {
-      setLoading(false);
-    }
+
+// Update the addAnotherChild function
+const addAnotherChild = () => {
+  if (fields.length >= 5) {
+    toast.error("You can add a maximum of 5 children.");
+    return;
+  }
+  append({
+    id: generateId(),
+    name: "",
+    gender: "Male",
+    age: 1,
+    connections: "",
+    details: "",
+    hobbies: "",
+  });
+};
+
+  const calculateHoursFromNow = (date: Date, time: string): number => {
+    const [hours, minutes] = time.split(':').map(Number);
+    const scheduledDate = new Date(date);
+    scheduledDate.setHours(hours, minutes);
+    const diffInMilliseconds = scheduledDate.getTime() - new Date().getTime();
+    return Math.max(0, Math.ceil(diffInMilliseconds / (1000 * 60 * 60)));
   };
- if(loading) return <Loader />
+
+  // Update the calculatePrice function in FormTwo
+const calculatePrice = (childrenCount: number, hasRecording: boolean): { price: number; planId: number; planName: string } => {
+  let selectedPlan: Plan;
+  
+  if (childrenCount > 1) {
+    // Family bundle for multiple children
+    selectedPlan = plans[2]; // Santa's Family Bundle
+  } else if (hasRecording) {
+    // Single child with recording
+    selectedPlan = plans[1]; // Includes Recording
+  } else {
+    // Single child without recording
+    selectedPlan = plans[0]; // Talk to Santa
+  }
+
+  return {
+    price: selectedPlan.price,
+    planId: selectedPlan.id,
+    planName: selectedPlan.name
+  };
+};
+
+const validateCheckoutData = (data: CheckoutData): boolean => {
+  // Required fields validation
+  const requiredFields = [
+    'id',
+    'price',
+    'planId',
+    'planName',
+    'parentName',
+    'parentEmail',
+    'parentPhone',
+    'children',
+    'selectedTimezone'
+  ];
+
+  const missingFields = requiredFields.filter(field => {
+    const value = data[field as keyof CheckoutData];
+    return value === undefined || value === null || value === '';
+  });
+
+  if (missingFields.length > 0) {
+    console.error('Missing required fields:', missingFields);
+    toast.error(`Missing required information: ${missingFields.join(', ')}`);
+    return false;
+  }
+
+  // Children data validation
+  if (!Array.isArray(data.children) || data.children.length === 0) {
+    console.error('Invalid children data');
+    toast.error('Child information is required');
+    return false;
+  }
+
+  // Validate each child has required fields
+  const invalidChildren = data.children.filter(child => 
+    !child.name || !child.age || !child.gender || 
+    !child.connections || !child.details || !child.hobbies
+  );
+  
+  if (invalidChildren.length > 0) {
+    console.error('Invalid child data:', invalidChildren);
+    toast.error('Please complete all required fields for each child');
+    return false;
+  }
+
+  // Scheduling validation
+  if (!data.callNow) {
+    if (!data.selectedSlot) {
+      console.error('Missing scheduled time for non-immediate call');
+      toast.error('Please select a date and time for the scheduled call');
+      return false;
+    }
+    
+    if (data.when === null || data.when === undefined) {
+      console.error('Missing "when" value for scheduled call');
+      toast.error('Invalid scheduling information');
+      return false;
+    }
+  }
+
+  return true;
+};
+
+//   // Update the onSubmit function in FormTwo
+//   const onSubmit = async (data: Step2FormData) => {
+//     try {
+//       if (!parentData) {
+//         toast.error('Parent information is missing');
+//         return;
+//       }
+  
+//       // Parse and format the date/time correctly
+//       let formattedSlot = '';
+//       let hoursUntil = 0;
+      
+//       if (isScheduled && data.scheduledDate && data.scheduledTime) {
+//         const scheduledDate = new Date(data.scheduledDate);
+//         const [hours, minutes] = data.scheduledTime.split(':').map(Number);
+//         scheduledDate.setHours(hours, minutes);
+        
+//         formattedSlot = scheduledDate.toLocaleString('en-US', {
+//           month: '2-digit',
+//           day: '2-digit',
+//           year: 'numeric',
+//           hour: '2-digit',
+//           minute: '2-digit',
+//           hour12: true,
+//           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+//         });
+  
+//         hoursUntil = calculateHoursFromNow(scheduledDate, data.scheduledTime);
+//       }
+  
+//       const { price, planId, planName } = calculatePrice(data.children.length, false);
+  
+//       const checkoutData: CheckoutData = {
+//         id: data.id,
+//         price,
+//         planId,
+//         planName,
+//         hasRecording: planId === 2,
+//         selectedSlot: formattedSlot || new Date().toLocaleString('en-US', {
+//           month: '2-digit',
+//           day: '2-digit',
+//           year: 'numeric',
+//           hour: '2-digit',
+//           minute: '2-digit',
+//           hour12: true,
+//           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+//         }),
+//         selectedTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+//         parentName: parentData.parentName,
+//         parentEmail: parentData.parentEmail,
+//         parentPhone: parentData.parentPhone,
+//         children: data.children,
+//         callNow: !isScheduled,
+//         when: isScheduled ? hoursUntil : 0,
+//         recipientName: data.recipientName,
+//         recipientPhone: data.recipientPhone,
+//       };
+
+//     console.log('Checkout data being saved:', checkoutData);
+
+
+//     // Validate the data before saving
+//     if (!validateCheckoutData(checkoutData)) {
+//       setLoading(false);
+//       return;
+//     }
+//     // Save to localStorage for checkout
+//     localStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+
+//     toast.success("Proceeding to checkout");
+//     router.push('/checkout');
+//   } catch (error) {
+//     console.error('Form submission error:', error);
+//     toast.error('An unexpected error occurred');
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+const onSubmit = async (data: Step2FormData) => {
+  try {
+    if (!parentData) {
+      toast.error('Parent information is missing');
+      return;
+    }
+    
+    setLoading(true);
+    
+    // Format date and time
+    let formattedDateTime = '';
+    let hoursUntil = 0;
+    
+    if (isScheduled && selectedTime) {
+      try {
+        let scheduledDate: Date;
+
+        // Check if the time is in ISO format
+        if (selectedTime.includes('T')) {
+          // Handle ISO format (2024-11-29T10:30:00+05:00)
+          scheduledDate = new Date(selectedTime);
+        } else {
+          // Handle custom format (10AM November 29 2024)
+          const dateTimeParts = selectedTime.match(/(\d+)(AM|PM)\s+(\w+)\s+(\d+)\s+(\d+)/i);
+          if (!dateTimeParts) {
+            throw new Error('Invalid date/time format');
+          }
+
+          const [_, hour, meridiem, month, day, year] = dateTimeParts;
+          const months = {
+            January: 0, February: 1, March: 2, April: 3, May: 4, June: 5,
+            July: 6, August: 7, September: 8, October: 9, November: 10, December: 11
+          };
+
+          scheduledDate = new Date();
+          scheduledDate.setFullYear(parseInt(year));
+          scheduledDate.setMonth(months[month as keyof typeof months]);
+          scheduledDate.setDate(parseInt(day));
+          
+          let hourNum = parseInt(hour);
+          if (meridiem.toUpperCase() === 'PM' && hourNum !== 12) {
+            hourNum += 12;
+          } else if (meridiem.toUpperCase() === 'AM' && hourNum === 12) {
+            hourNum = 0;
+          }
+          
+          scheduledDate.setHours(hourNum, 0, 0, 0);
+        }
+
+        // Format the date-time string in required format
+        formattedDateTime = scheduledDate.toLocaleString('en-US', {
+          month: '2-digit',
+          day: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        });
+
+        // Calculate hours until call
+        const now = new Date();
+        hoursUntil = Math.max(0, Math.ceil((scheduledDate.getTime() - now.getTime()) / (1000 * 60 * 60)));
+        
+        console.log('Debug - Parsed DateTime:', {
+          original: selectedTime,
+          parsed: scheduledDate,
+          formatted: formattedDateTime,
+          hoursUntil
+        });
+      } catch (error) {
+        console.error('Error parsing date/time:', error);
+        toast.error('Invalid date or time selected');
+        setLoading(false);
+        return;
+      }
+    }
+
+    const { price, planId, planName } = calculatePrice(data.children.length, false);
+
+    console.log('Debug - Form Data:', {
+      children: data.children,
+      isScheduled,
+      selectedTime,
+      hasRecording: planId === 2
+    });
+
+    const checkoutData: CheckoutData = {
+      id: data.id,
+      price,
+      planId,
+      planName,
+      hasRecording: planId === 2,
+      selectedSlot: formattedDateTime,
+      selectedTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      parentName: parentData.parentName,
+      parentEmail: parentData.parentEmail,
+      parentPhone: parentData.parentPhone,
+      children: data.children.map(child => ({
+        id: child.id,
+        name: child.name,       // Include name
+        age: child.age,         // Include age
+        gender: child.gender,
+        connections: child.connections || '',
+        details: child.details || '',
+        hobbies: child.hobbies || '',
+      })),
+      callNow: !isScheduled,
+      when: isScheduled ? hoursUntil : 0,
+      recipientName: data.recipientName || undefined,
+      recipientPhone: data.recipientPhone || undefined,
+    };
+
+// After creating checkoutData:
+console.log('Debug - Checkout Data:', {
+  children: checkoutData.children,
+  hasRecording: checkoutData.hasRecording,
+  planId: checkoutData.planId
+});
+    if (!validateCheckoutData(checkoutData)) {
+      setLoading(false);
+      return;
+    }
+
+    localStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+    toast.success("Proceeding to checkout");
+    router.push('/checkout');
+  } catch (error) {
+    console.error('Form submission error:', error);
+    toast.error('An unexpected error occurred');
+  } finally {
+    setLoading(false);
+  }
+};
+
+  if (loading) return <Loader />;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="text-white">
       {fields.map((child, index) => (
@@ -269,24 +474,22 @@ function FormTwo() {
               </div>
             </div>
           )}
-          {
-            index === 0 ? (
-              <InputField
+          {index === 0 ? (
+            <InputField
               type="text"
-              label="Child’s Name"
-              disabled
-              value={userInfo as string}
+              label="Child's Name"
               placeholder="Child's Name"
               {...register(`children.${index}.name`)}
             />
-            ) : <InputField
-            type="text"
-            label="Child’s Name"
-            placeholder="Child's Name"
-            {...register(`children.${index}.name`)}
-          />
-          }
-          
+          ) : (
+            <InputField
+              type="text"
+              label="Child&lsquo;s Name"
+              placeholder="Child&lsquo;s Name"
+              {...register(`children.${index}.name`)}
+            />
+          )}
+
           <div className="my-2 gap-5 flex items-center justify-between">
             <div className="basis-[95%]">
               <label
@@ -298,9 +501,8 @@ function FormTwo() {
               <Select
                 defaultValue="Male"
                 onValueChange={(value) => {
-                  setValue(`children.${index}.gender`, value as ("Male" | "Female")); 
-                }
-                }
+                  setValue(`children.${index}.gender`, value as ("Male" | "Female"));
+                }}
               >
                 <SelectTrigger className="bg-[#554735] border-[1px] border-[#827E4B] my-2 py-2 px-4 text-white placeholder:text-white font-harmonia text-lg font-normal focus:outline-none w-full h-full rounded-full">
                   <SelectValue placeholder="Gender" />
@@ -309,10 +511,7 @@ function FormTwo() {
                   <SelectItem value="Male" className="bg-[#554735] text-white">
                     Male
                   </SelectItem>
-                  <SelectItem
-                    value="Female"
-                    className="bg-[#554735] text-white"
-                  >
+                  <SelectItem value="Female" className="bg-[#554735] text-white">
                     Female
                   </SelectItem>
                 </SelectContent>
@@ -371,7 +570,7 @@ function FormTwo() {
               {...register("callType")}
               value="Immediate"
               id="now"
-              onChange={() => setIsScheduled(false)} // Update state for immediate calls
+              onChange={() => setIsScheduled(false)}
             />
             <label htmlFor="now" className="text-white text-sm font-harmonia">
               Call in 5 minutes or scheduling
@@ -384,92 +583,30 @@ function FormTwo() {
               value="Scheduled"
               id="schedule"
               {...register("callType")}
-              onChange={() => setIsScheduled(true)} // Update state for scheduled calls
+              onChange={() => setIsScheduled(true)}
             />
-            <label
-              htmlFor="schedule"
-              className="text-white text-sm font-harmonia"
-            >
+            <label htmlFor="schedule" className="text-white text-sm font-harmonia">
               Schedule
             </label>
           </div>
         </div>
 
         {isScheduled && (
-          <div className="flex flex-col md:flex-row gap-4 mt-4">
-            {/* <InputField
-            placeholder="Enter a date and time"
-              label="Scheduled Date"
-              type="date"
-              
-              {...register("scheduledDate")}
-            /> */}
+          <div className="flex flex-col gap-4 mt-4">
             <div className="flex w-full flex-col gap-1">
-            <label
-        className="text-lg font-semibold font-seasons"
-        style={{ textShadow: "0 0 20px #FCCC73" }}
-      >
-        Scheduled Date
-      </label>
-      <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant={"outline"}
-          className={cn(
-            "w-full bg-[#554735] border-[1px] border-[#827E4B] my-2 py-6 px-4 text-white placeholder:text-white font-harmonia text-lg font-normal focus:outline-none rounded-full justify-start text-left",
-            !date && "text-muted-foreground"
-          )}
-        >
-          <CalendarIcon />
-          {date ? format(date, "PPP") : <span>Pick a date</span>}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
-        <Select
-          onValueChange={(value) =>{
-            setDate(addDays(new Date(), parseInt(value)))
-            setValue(`scheduledDate`, value);
-            console.log('yeah',date)
-          }
-        }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select" />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            <SelectItem value="0">Today</SelectItem>
-            <SelectItem value="1">Tomorrow</SelectItem>
-            <SelectItem value="3">In 3 days</SelectItem>
-            <SelectItem value="7">In a week</SelectItem>
-          </SelectContent>
-        </Select>
-        <div className="rounded-md border">
-        <Calendar
-  defaultMonth={date}
-  mode="single"
-  selected={date}
-  onSelect={(day) => {
-    if (day) {
-      setDate(day); // Update the local `date` state
-      setValue("scheduledDate", day.toString()); // Set the `scheduledDate` in form state
-      console.log("Calendar Selected Date:", day); // Debugging log
-    }
-  }}
-  disabled={(day) => {
-    const formattedDate = format(day, "yyyy-MM-dd");
-    return disabledSlots.includes(formattedDate); // Disable if in the disabled slots
-  }}
-/>
-        </div>
-      </PopoverContent>
-    </Popover>
+              <CustomCalendar
+                onDateTimeSelect={(selectedDate, time) => {
+                  setDate(selectedDate);
+                  setSelectedTime(time);
+                  setValue("scheduledDate", selectedDate.toString(), {
+                    shouldValidate: false,
+                  });
+                  setValue("scheduledTime", time, {
+                    shouldValidate: false,
+                  });
+                }}
+              />
             </div>
-            <InputField
-            placeholder="Enter time"
-              label="Scheduled Time"
-              type="time"
-              {...register("scheduledTime")}
-            />
           </div>
         )}
 
@@ -495,16 +632,15 @@ function FormTwo() {
       {sendAsGift && (
         <div className="my-2 gap-5 flex flex-col md:flex-row items-center justify-between">
           <InputField
-            label="Recipient’s Name"
+            label="Recipient&lsquo;s Name"
             type="text"
             {...register("recipientName")}
             placeholder="Recipient name"
           />
-        
           <InputField
             type="text"
             {...register("recipientPhone")}
-            label="Recipient’s Phone Number"
+            label="Recipient&lsquo;s Phone Number"
             placeholder="Recipient phone number"
           />
         </div>
@@ -513,8 +649,7 @@ function FormTwo() {
       <button
         type="submit"
         style={{
-          background:
-            "linear-gradient(144.94deg, #C70A27 31.33%, #7B0F10 100.41%)",
+          background: "linear-gradient(144.94deg, #C70A27 31.33%, #7B0F10 100.41%)",
           border: "3px solid #a5494d ",
           boxShadow: "0px 0px 40px 0px #D9C99966",
         }}

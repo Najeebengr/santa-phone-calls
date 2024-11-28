@@ -7,10 +7,10 @@ import { features, MallSantaExperience, MessageFromSanta, PNP, SantaPhoneCalls }
 
 function Footer() {
   return (
-    <footer className='container py-10 md:py-0 px-8 xl:px-0 mx-auto block md:absolute bottom-8 left-0 right-0'>
-    <div className='flex  md:py-0 flex-col md:flex-row justify-center md:justify-between items-center md:items-end '>
-      <div className='text-lg md:text-2xl md:py-0 block md:relative left-0 md:left-0 lg:left-0 xl:-left-6  text-white font-harmonia border-b-2 border-white'>
-
+    <footer className='relative md:fixed bottom-0 left-0 right-0 w-full bg-transparent z-10'>
+      <div className='container py-6 md:py-8 px-8 xl:px-0 mx-auto'>
+        <div className='flex flex-col md:flex-row justify-center md:justify-between items-center md:items-end'>
+          <div className='text-lg md:text-2xl text-white font-harmonia border-b-2 border-white'>
       <Dialog >
       <DialogTrigger className=''>
       <div >
@@ -188,6 +188,7 @@ function Footer() {
             />
         </div>
       </div>
+    </div>
     </div>
     </footer>
   )

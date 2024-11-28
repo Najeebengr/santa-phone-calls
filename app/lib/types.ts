@@ -4,4 +4,5 @@ export type Plan = {
     description: string;
     price: number;
     per: string;
+    hasRecording: boolean;
   };
