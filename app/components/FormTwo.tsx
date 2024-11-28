@@ -38,7 +38,7 @@ function FormTwo() {
 
   const [loading, setLoading] = useState(false);
   const [disabledSlots, setDisabledSlots] = useState<string[]>([]);
-  const [userInfo, setUserInfo] = useState({ childName: '', parentEmail: '', parentNumber: '' });
+  const [userInfo, setUserInfo] = useState<string | null>(null);
   // Generate a random time between 08:00 and 20:00
   const randomTime = () => {
     const hour = String(Math.floor(Math.random() * (20 - 8 + 1) + 8)).padStart(2, "0"); // Random hour (08-20)
@@ -89,8 +89,7 @@ function FormTwo() {
 
       if (response.ok) {
         
-        setUserInfo(result.user);
-        console.log('user ha', result.user);
+        setUserInfo(result.user.childName || "Default Name");
       } else {
         toast.error(result.message || 'An error occurred');
       }
@@ -102,7 +101,14 @@ function FormTwo() {
     }
   };
   useEffect(() => {
+    if (userInfo) {
+      console.log("Setting userInfo to children[0].name:", userInfo);
+      setValue("children.0.name", userInfo);
+    }
+  }, [userInfo, setValue]);
+  useEffect(() => {
      getCurrentUser();
+     console.log("User Info Child Name:", userInfo);
   }, []);
   const fetchDisabledSlots = async (date: string) => {
     try {
@@ -162,8 +168,10 @@ function FormTwo() {
       displayErrors(errors);
     }
   }, [errors]);
-  const onSubmit = async (data: z.infer<typeof step2Schema>) => {
+  const onSubmit = async (data: z.infer<typeof step2Schema>) => { 
    setLoading(true);
+   
+  console.log("data", data);
     try {
       const apiEndpoint = '/api/childRegister';
       const result = await fetch(apiEndpoint, {
@@ -267,7 +275,7 @@ function FormTwo() {
               type="text"
               label="Child’s Name"
               disabled
-              value={userInfo.childName}
+              value={userInfo as string}
               placeholder="Child's Name"
               {...register(`children.${index}.name`)}
             />
