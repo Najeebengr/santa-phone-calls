@@ -1,23 +1,25 @@
 import type { NextConfig } from "next";
+import path from 'path';
 
 const nextConfig = {
   output: 'standalone',
   experimental: {
-    serverComponentsExternalPackages: ['@prisma/client'],
+    serverExternalPackages: ['@prisma/client'], // Updated from serverComponentsExternalPackages
   },
   webpack: (config, { dev, isServer }) => {
-    // Keep cache enabled but with different settings for Replit
+    // Use absolute path for cache directory
+    const cacheDir = path.resolve(process.cwd(), '.next/cache');
     config.cache = {
       type: 'filesystem',
       buildDependencies: {
         config: [__filename],
       },
-      cacheDirectory: '.next/cache',
+      cacheDirectory: cacheDir,
       name: isServer ? 'server' : 'client',
       version: '1',
     }
     return config
   },
-}
+} as NextConfig;
 
 export default nextConfig;
