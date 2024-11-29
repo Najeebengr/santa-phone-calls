@@ -1,72 +1,42 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import InfoFormWrapper from '../components/InfoFormWrapper';
 import toast from 'react-hot-toast';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Loader from '../components/Loader';
 
 function Info() {
-  const searchParams = useSearchParams();
-  const id = searchParams.get('id');
-  const [userInfo, setUserInfo] = useState({ childName: '', parentEmail: '', parentNumber: '' });
+  const [userInfo, setUserInfo] = useState({ parentName: '', parentEmail: '', parentNumber: '' });
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const setLoginSession = async (id: string) => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/loginSession', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      });
-      const result = await response.json();
-      if (response.ok) {
-        toast.success(result.message);
-      } else {
-        toast.error(result.message || 'An error occurred');
-      }
-    } catch (error) {
-      console.error('Error during API call:', error);
-      toast.error('An unexpected error occurred');
+  useEffect(() => {
+    const storedData = localStorage.getItem('userFormData');
+    if (!storedData) {
+      toast.error('Please fill out your information first!');
+      router.push('/');
+      return;
     }
-    setLoading(false);
-  };
 
-  const getCurrenUser = useCallback(async () => {
     try {
-      const response = await fetch('/api/currentUser', { method: 'GET' });
-      const result = await response.json();
-
-      if (response.ok) {
-        if (!result.user.parentEmail) {
-          toast.error('Kindly Fill out this Info First!');
-          router.push('/');
-          return;
-        }
-        setUserInfo(result.user);
-      } else {
-        toast.error(result.message || 'An error occurred');
-      }
+      const parsedData = JSON.parse(storedData);
+      setUserInfo({
+        childName: parsedData.childName || '',
+        parentEmail: parsedData.parentEmail || '',
+        parentNumber: parsedData.parentPhone || ''
+      });
     } catch (error) {
-      console.error('Error during API call:', error);
-      toast.error('An unexpected error occurred');
+      console.error('Error parsing stored data:', error);
+      toast.error('Error loading your information');
     } finally {
       setLoading(false);
     }
-  }, [router]); // Include router in dependencies since it's used inside the function
+  }, [router]);
 
-  useEffect(() => {
-    const handleSessionAndUser = async () => {
-      if (id) {
-        await setLoginSession(id);
-      }
-      await getCurrenUser();
-    };
-
-    handleSessionAndUser();
-  }, [id, getCurrenUser]);
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <section className="bg-[url('/christmas.jpeg')] bg-cover bg-center bg-no-repeat min-h-screen w-full px-6 lg:px-6 xl:px-0 py-10 mx-auto relative z-10">
@@ -78,7 +48,7 @@ function Info() {
           This part makes the call amazing
         </p>
       </div>
-      <div>{loading ? <Loader /> : userInfo.parentEmail && <InfoFormWrapper />}</div>
+      <div><InfoFormWrapper userInfo={userInfo} /></div>
     </section>
   );
 }

@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import Loader from "./Loader";
 
-function FormTwo() {
+function FormTwo({ userInfo }: { userInfo?: { parentName: string; parentEmail: string; parentNumber: string } }) {
   const router = useRouter();
   // Remove unused date state since selectedTime is being used instead
   const [loading, setLoading] = useState(false);
@@ -80,6 +80,16 @@ function FormTwo() {
 
   const getCurrentUser = React.useCallback(() => {
     try {
+      if (userInfo) {
+        // If userInfo is passed as a prop, use it directly
+        setParentData({
+          parentName: userInfo.parentName,
+          parentEmail: userInfo.parentEmail,
+          parentPhone: userInfo.parentNumber
+        });
+        return;
+      }
+
       const storedData = localStorage.getItem('userFormData');
       if (!storedData) {
         toast.error('Please complete step 1 first');
@@ -93,7 +103,7 @@ function FormTwo() {
       console.error('Error retrieving user data:', error);
       toast.error('An unexpected error occurred');
     }
-  }, [router]);
+  }, [router, userInfo]);
 
   useEffect(() => {
     getCurrentUser();
@@ -217,84 +227,7 @@ const validateCheckoutData = (data: CheckoutData): boolean => {
   return true;
 };
 
-//   // Update the onSubmit function in FormTwo
-//   const onSubmit = async (data: Step2FormData) => {
-//     try {
-//       if (!parentData) {
-//         toast.error('Parent information is missing');
-//         return;
-//       }
-  
-//       // Parse and format the date/time correctly
-//       let formattedSlot = '';
-//       let hoursUntil = 0;
-      
-//       if (isScheduled && data.scheduledDate && data.scheduledTime) {
-//         const scheduledDate = new Date(data.scheduledDate);
-//         const [hours, minutes] = data.scheduledTime.split(':').map(Number);
-//         scheduledDate.setHours(hours, minutes);
-        
-//         formattedSlot = scheduledDate.toLocaleString('en-US', {
-//           month: '2-digit',
-//           day: '2-digit',
-//           year: 'numeric',
-//           hour: '2-digit',
-//           minute: '2-digit',
-//           hour12: true,
-//           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-//         });
-  
-//         hoursUntil = calculateHoursFromNow(scheduledDate, data.scheduledTime);
-//       }
-  
-//       const { price, planId, planName } = calculatePrice(data.children.length, false);
-  
-//       const checkoutData: CheckoutData = {
-//         id: data.id,
-//         price,
-//         planId,
-//         planName,
-//         hasRecording: planId === 2,
-//         selectedSlot: formattedSlot || new Date().toLocaleString('en-US', {
-//           month: '2-digit',
-//           day: '2-digit',
-//           year: 'numeric',
-//           hour: '2-digit',
-//           minute: '2-digit',
-//           hour12: true,
-//           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-//         }),
-//         selectedTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-//         parentName: parentData.parentName,
-//         parentEmail: parentData.parentEmail,
-//         parentPhone: parentData.parentPhone,
-//         children: data.children,
-//         callNow: !isScheduled,
-//         when: isScheduled ? hoursUntil : 0,
-//         recipientName: data.recipientName,
-//         recipientPhone: data.recipientPhone,
-//       };
 
-//     console.log('Checkout data being saved:', checkoutData);
-
-
-//     // Validate the data before saving
-//     if (!validateCheckoutData(checkoutData)) {
-//       setLoading(false);
-//       return;
-//     }
-//     // Save to localStorage for checkout
-//     localStorage.setItem('checkoutData', JSON.stringify(checkoutData));
-
-//     toast.success("Proceeding to checkout");
-//     router.push('/checkout');
-//   } catch (error) {
-//     console.error('Form submission error:', error);
-//     toast.error('An unexpected error occurred');
-//   } finally {
-//     setLoading(false);
-//   }
-// };
 const onSubmit = async (data: Step2FormData) => {
   try {
     if (!parentData) {

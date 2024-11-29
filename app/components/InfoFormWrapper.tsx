@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import FormTwo from "./FormTwo";
 
-function InfoFormWrapper() {
+function InfoFormWrapper({ userInfo }: { userInfo: { childName: string; parentEmail: string; parentNumber: string } }) {
  
   return (
     <div
@@ -16,7 +16,7 @@ function InfoFormWrapper() {
       }}
       className="xl:w-[55vw] lg:w-[73vw] relative rounded-lg py-5 px-8 mx-auto mb-20"
     >
-     <FormTwo />
+     <FormTwo userInfo={userInfo} />
       
       <div className="relative">
         
