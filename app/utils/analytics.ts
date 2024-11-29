@@ -1,3 +1,4 @@
+import { useEffect, useCallback } from 'react';
 
 // Generic tracking types
 type GtagEventParams = {
@@ -64,7 +65,7 @@ interface TrackingItem {
   has_recording?: boolean;
 }
 
-interface Plan {
+export interface Plan {
   id: number;
   name: string;
   price: number;
@@ -83,105 +84,292 @@ export interface TrackingUserData {
   fullName?: string;
 }
 
+export function useTracking() {
+  useEffect(() => {
+    // Initialize tracking only on client side
+    if (typeof window !== 'undefined') {
+      window.dataLayer = window.dataLayer || [];
+    }
+  }, []);
+
+  const trackPageView = useCallback((pageName: string): void => {
+    if (typeof window === 'undefined') return;
+
+    setTimeout(() => {
+      window.gtag?.('event', 'page_view', {
+        page_title: pageName,
+        page_location: window.location.href,
+        page_path: window.location.pathname,
+      });
+
+      window.fbq?.('track', 'PageView');
+
+      window.ttq?.track('ViewContent', {
+        content_name: pageName,
+        content_type: 'product_group',
+      });
+    }, 0);
+  }, []);
+
+  const trackAddToCart = useCallback((plan: Plan): void => {
+    if (typeof window === 'undefined') return;
+
+    setTimeout(() => {
+      const eventData: BaseEventData = {
+        currency: 'USD',
+        value: plan.price,
+        items: [{
+          item_id: plan.id.toString(),
+          item_name: plan.name,
+          price: plan.price,
+          has_recording: plan.hasRecording,
+        }],
+      };
+
+      window.gtag?.('event', 'add_to_cart', eventData);
+
+      window.fbq?.('track', 'AddToCart', {
+        currency: 'USD',
+        value: plan.price,
+        content_name: plan.name,
+        content_type: 'product',
+        content_ids: [plan.id],
+      });
+
+      window.ttq?.track('AddToCart', {
+        contents: [{
+          content_id: plan.id.toString(),
+          content_type: 'product',
+          content_name: plan.name,
+          price: plan.price,
+        }],
+        value: plan.price,
+        currency: 'USD',
+      });
+    }, 0);
+  }, []);
+
+  const trackCheckoutInitiated = useCallback((plan: Plan, userData?: TrackingUserData): void => {
+    if (typeof window === 'undefined') return;
+
+    setTimeout(() => {
+      const eventData: BaseEventData = {
+        currency: 'USD',
+        value: plan.price,
+        items: [{
+          item_id: plan.id.toString(),
+          item_name: plan.name,
+          price: plan.price,
+          has_recording: plan.hasRecording,
+        }],
+      };
+
+      window.gtag?.('event', 'begin_checkout', eventData);
+
+      window.fbq?.('track', 'InitiateCheckout', {
+        currency: 'USD',
+        value: plan.price,
+        content_name: plan.name,
+        content_type: 'product',
+        content_ids: [plan.id],
+      });
+
+      const tiktokEventData: TiktokEventParams = {
+        contents: [{
+          content_id: plan.id.toString(),
+          content_type: 'product',
+          content_name: plan.name,
+          price: plan.price,
+        }],
+        value: plan.price,
+        currency: 'USD',
+        content_id: plan.id.toString(),
+        content_type: 'product',
+        content_name: plan.name,
+      };
+
+      if (userData?.email) {
+        Object.assign(tiktokEventData, { email: userData.email });
+      }
+      if (userData?.phone) {
+        Object.assign(tiktokEventData, { phone_number: userData.phone });
+      }
+
+      window.ttq?.track('InitiateCheckout', tiktokEventData);
+    }, 0);
+  }, []);
+
+  const trackPurchase = useCallback((
+    paymentIntentId: string,
+    amount: number,
+    packageName: string,
+    userData?: TrackingUserData
+  ): void => {
+    if (typeof window === 'undefined') return;
+
+    setTimeout(() => {
+      const eventData: BaseEventData = {
+        currency: 'USD',
+        value: amount,
+        items: [{
+          item_id: paymentIntentId,
+          item_name: packageName,
+          price: amount,
+        }],
+      };
+
+      window.gtag?.('event', 'purchase', {
+        ...eventData,
+        transaction_id: paymentIntentId,
+      });
+
+      window.fbq?.('track', 'Purchase', {
+        currency: 'USD',
+        value: amount,
+        content_name: packageName,
+        content_type: 'product',
+        content_ids: [paymentIntentId],
+      });
+
+      const tiktokEventData: TiktokEventParams = {
+        contents: [{
+          content_id: paymentIntentId,
+          content_type: 'product',
+          content_name: packageName,
+          price: amount,
+        }],
+        value: amount,
+        currency: 'USD',
+        content_id: paymentIntentId,
+        content_type: 'product',
+        content_name: packageName,
+      };
+
+      if (userData?.email) {
+        Object.assign(tiktokEventData, { email: userData.email });
+      }
+      if (userData?.phone) {
+        Object.assign(tiktokEventData, { phone_number: userData.phone });
+      }
+
+      window.ttq?.track('CompletePayment', tiktokEventData);
+    }, 0);
+  }, []);
+
+  return {
+    trackPageView,
+    trackAddToCart,
+    trackCheckoutInitiated,
+    trackPurchase,
+  };
+}
+
+// Export individual functions for non-hook usage
 export const trackPageView = (pageName: string): void => {
   if (typeof window === 'undefined') return;
+  
+  setTimeout(() => {
+    window.gtag?.('event', 'page_view', {
+      page_title: pageName,
+      page_location: window.location.href,
+      page_path: window.location.pathname,
+    });
 
-  window.gtag?.('event', 'page_view', {
-    page_title: pageName,
-    page_location: window.location.href,
-    page_path: window.location.pathname,
-  });
+    window.fbq?.('track', 'PageView');
 
-  window.fbq?.('track', 'PageView');
-
-  window.ttq?.track('ViewContent', {
-    content_name: pageName,
-    content_type: 'product_group',
-  });
+    window.ttq?.track('ViewContent', {
+      content_name: pageName,
+      content_type: 'product_group',
+    });
+  }, 0);
 };
 
 export const trackAddToCart = (plan: Plan): void => {
   if (typeof window === 'undefined') return;
 
-  const eventData: BaseEventData = {
-    currency: 'USD',
-    value: plan.price,
-    items: [{
-      item_id: plan.id.toString(),
-      item_name: plan.name,
-      price: plan.price,
-      has_recording: plan.hasRecording,
-    }],
-  };
+  setTimeout(() => {
+    const eventData: BaseEventData = {
+      currency: 'USD',
+      value: plan.price,
+      items: [{
+        item_id: plan.id.toString(),
+        item_name: plan.name,
+        price: plan.price,
+        has_recording: plan.hasRecording,
+      }],
+    };
 
-  window.gtag?.('event', 'add_to_cart', eventData);
+    window.gtag?.('event', 'add_to_cart', eventData);
 
-  window.fbq?.('track', 'AddToCart', {
-    currency: 'USD',
-    value: plan.price,
-    content_name: plan.name,
-    content_type: 'product',
-    content_ids: [plan.id],
-  });
-
-  window.ttq?.track('AddToCart', {
-    contents: [{
-      content_id: plan.id.toString(),
-      content_type: 'product',
+    window.fbq?.('track', 'AddToCart', {
+      currency: 'USD',
+      value: plan.price,
       content_name: plan.name,
-      price: plan.price,
-    }],
-    value: plan.price,
-    currency: 'USD',
-  });
+      content_type: 'product',
+      content_ids: [plan.id],
+    });
+
+    window.ttq?.track('AddToCart', {
+      contents: [{
+        content_id: plan.id.toString(),
+        content_type: 'product',
+        content_name: plan.name,
+        price: plan.price,
+      }],
+      value: plan.price,
+      currency: 'USD',
+    });
+  }, 0);
 };
 
 export const trackCheckoutInitiated = (plan: Plan, userData?: TrackingUserData): void => {
   if (typeof window === 'undefined') return;
 
-  const eventData: BaseEventData = {
-    currency: 'USD',
-    value: plan.price,
-    items: [{
-      item_id: plan.id.toString(),
-      item_name: plan.name,
-      price: plan.price,
-      has_recording: plan.hasRecording,
-    }],
-  };
+  setTimeout(() => {
+    const eventData: BaseEventData = {
+      currency: 'USD',
+      value: plan.price,
+      items: [{
+        item_id: plan.id.toString(),
+        item_name: plan.name,
+        price: plan.price,
+        has_recording: plan.hasRecording,
+      }],
+    };
 
-  window.gtag?.('event', 'begin_checkout', eventData);
+    window.gtag?.('event', 'begin_checkout', eventData);
 
-  window.fbq?.('track', 'InitiateCheckout', {
-    currency: 'USD',
-    value: plan.price,
-    content_name: plan.name,
-    content_type: 'product',
-    content_ids: [plan.id],
-  });
+    window.fbq?.('track', 'InitiateCheckout', {
+      currency: 'USD',
+      value: plan.price,
+      content_name: plan.name,
+      content_type: 'product',
+      content_ids: [plan.id],
+    });
 
-  const tiktokEventData = {
-    contents: [{
+    const tiktokEventData: TiktokEventParams = {
+      contents: [{
+        content_id: plan.id.toString(),
+        content_type: 'product',
+        content_name: plan.name,
+        price: plan.price,
+      }],
+      value: plan.price,
+      currency: 'USD',
       content_id: plan.id.toString(),
       content_type: 'product',
       content_name: plan.name,
-      price: plan.price,
-    }],
-    value: plan.price,
-    currency: 'USD',
-    content_id: plan.id.toString(),
-    content_type: 'product',
-    content_name: plan.name,
-  };
+    };
 
-  if (userData?.email) {
-    Object.assign(tiktokEventData, { email: userData.email });
-  }
-  if (userData?.phone) {
-    Object.assign(tiktokEventData, { phone_number: userData.phone });
-  }
+    if (userData?.email) {
+      Object.assign(tiktokEventData, { email: userData.email });
+    }
+    if (userData?.phone) {
+      Object.assign(tiktokEventData, { phone_number: userData.phone });
+    }
 
-  window.ttq?.track('InitiateCheckout', tiktokEventData);
+    window.ttq?.track('InitiateCheckout', tiktokEventData);
+  }, 0);
 };
 
 export const trackPurchase = (
@@ -192,49 +380,51 @@ export const trackPurchase = (
 ): void => {
   if (typeof window === 'undefined') return;
 
-  const eventData: BaseEventData = {
-    currency: 'USD',
-    value: amount,
-    items: [{
-      item_id: paymentIntentId,
-      item_name: packageName,
-      price: amount,
-    }],
-  };
+  setTimeout(() => {
+    const eventData: BaseEventData = {
+      currency: 'USD',
+      value: amount,
+      items: [{
+        item_id: paymentIntentId,
+        item_name: packageName,
+        price: amount,
+      }],
+    };
 
-  window.gtag?.('event', 'purchase', {
-    ...eventData,
-    transaction_id: paymentIntentId,
-  });
+    window.gtag?.('event', 'purchase', {
+      ...eventData,
+      transaction_id: paymentIntentId,
+    });
 
-  window.fbq?.('track', 'Purchase', {
-    currency: 'USD',
-    value: amount,
-    content_name: packageName,
-    content_type: 'product',
-    content_ids: [paymentIntentId],
-  });
+    window.fbq?.('track', 'Purchase', {
+      currency: 'USD',
+      value: amount,
+      content_name: packageName,
+      content_type: 'product',
+      content_ids: [paymentIntentId],
+    });
 
-  const tiktokEventData = {
-    contents: [{
+    const tiktokEventData: TiktokEventParams = {
+      contents: [{
+        content_id: paymentIntentId,
+        content_type: 'product',
+        content_name: packageName,
+        price: amount,
+      }],
+      value: amount,
+      currency: 'USD',
       content_id: paymentIntentId,
       content_type: 'product',
       content_name: packageName,
-      price: amount,
-    }],
-    value: amount,
-    currency: 'USD',
-    content_id: paymentIntentId,
-    content_type: 'product',
-    content_name: packageName,
-  };
+    };
 
-  if (userData?.email) {
-    Object.assign(tiktokEventData, { email: userData.email });
-  }
-  if (userData?.phone) {
-    Object.assign(tiktokEventData, { phone_number: userData.phone });
-  }
+    if (userData?.email) {
+      Object.assign(tiktokEventData, { email: userData.email });
+    }
+    if (userData?.phone) {
+      Object.assign(tiktokEventData, { phone_number: userData.phone });
+    }
 
-  window.ttq?.track('CompletePayment', tiktokEventData);
+    window.ttq?.track('CompletePayment', tiktokEventData);
+  }, 0);
 };

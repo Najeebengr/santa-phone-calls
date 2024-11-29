@@ -41,3 +41,5 @@ next-env.d.ts
 %HOMEPATH%/.ssh/replit
 %HOMEPATH%/.ssh/replit.pub
 tracking.md
+.ssh/replit
+.ssh/replit.pub

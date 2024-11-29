@@ -41,12 +41,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
+      <body className={`${harmoniaSans.variable} ${theSeasons.variable} antialiased`}>
+        {children}
+        <Toaster position="top-right" reverseOrder={false} />
+        
+        {/* Move scripts to end of body and use next/script properly */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${TRACKING_IDS.GA_MEASUREMENT_ID}`}
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="google-analytics" strategy="afterInteractive">
+        <Script id="google-analytics" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
@@ -54,7 +58,7 @@ export default function RootLayout({
             gtag('config', '${TRACKING_IDS.GA_MEASUREMENT_ID}');
           `}
         </Script>
-        <Script id="meta-pixel" strategy="afterInteractive">
+        <Script id="meta-pixel" strategy="lazyOnload">
           {`
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -68,7 +72,7 @@ export default function RootLayout({
             fbq('track', 'PageView');
           `}
         </Script>
-        <Script id="tiktok-pixel" strategy="afterInteractive">
+        <Script id="tiktok-pixel" strategy="lazyOnload">
           {`
             !function (w, d, t) {
               w.TiktokAnalyticsObject=t;
@@ -84,7 +88,6 @@ export default function RootLayout({
           `}
         </Script>
         <noscript>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
             height="1" 
             width="1" 
@@ -93,12 +96,6 @@ export default function RootLayout({
             alt=""
           />
         </noscript>
-      </head>
-      <body
-        className={`${harmoniaSans.variable} ${theSeasons.variable} antialiased`}
-      >
-        <Toaster position="top-right" reverseOrder={false} />
-        {children}
       </body>
     </html>
   );
