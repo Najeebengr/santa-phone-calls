@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 // Define interfaces for the incoming data structure
 interface IncomingChild {
@@ -40,9 +40,9 @@ interface FormattedChild {
   childName: string;
   childAge: number;
   childGender: string;
-  connections: string;
-  details: string;
-  hobbies: string;
+  FamilySocialConnections: string;
+  HolidaySpecificDetails: string;
+  InterestsAndHobbies: string;
 }
 
 function calculateHoursFromNow(date: Date): number {
@@ -50,53 +50,86 @@ function calculateHoursFromNow(date: Date): number {
   return Math.max(0, Math.ceil(diffInMilliseconds / (1000 * 60 * 60)));
 }
 
+function formatUSPhoneNumber(phone: string): string {
+  // Remove all non-numeric characters
+  const cleaned = phone.replace(/\D/g, "");
+
+  // Check if it's a US number (10 digits)
+  if (cleaned.length === 10) {
+    return `+1${cleaned}`;
+  }
+
+  // If it already has the country code (11 digits starting with 1)
+  if (cleaned.length === 11 && cleaned.startsWith("1")) {
+    return `+${cleaned}`;
+  }
+
+  // Return original if not a valid US number
+  return phone;
+}
 export async function POST(request: Request) {
   try {
-    const data = await request.json() as WebhookRequestData;
-    
-    console.log('Debug - Raw incoming data:', data);
+    const data = (await request.json()) as WebhookRequestData;
+
+    console.log("Debug - Raw incoming data:", data);
 
     // Validate required fields
-    if (!data.children || !Array.isArray(data.children) || data.children.length === 0) {
-      console.error('No children data received');
+    if (
+      !data.children ||
+      !Array.isArray(data.children) ||
+      data.children.length === 0
+    ) {
+      console.error("No children data received");
       return NextResponse.json(
-        { success: false, error: 'Children data is required' },
-        { status: 400 }
+        { success: false, error: "Children data is required" },
+        { status: 400 },
       );
     }
 
     // Format children data according to schema
-    const formattedChildren: FormattedChild[] = data.children.map((child: IncomingChild) => ({
-      id: child.id,
-      childName: child.childName || child.name || '',
-      childAge: child.childAge || child.age || 0,
-      childGender: child.childGender || child.gender || '',
-      connections: child.connections || '',
-      details: child.details || '',
-      hobbies: child.hobbies || '',
-    }));
+    const formattedChildren: FormattedChild[] = data.children.map(
+      (child: IncomingChild) => ({
+        id: child.id,
+        childName: child.childName || child.name || "",
+        childAge: child.childAge || child.age || 0,
+        childGender: child.childGender || child.gender || "",
+        FamilySocialConnections: child.connections || "",
+        HolidaySpecificDetails: child.details || "",
+        InterestsAndHobbies: child.hobbies || "",
+      }),
+    );
 
-    console.log('Debug - Formatted children:', formattedChildren);
+    console.log("Debug - Formatted children:", formattedChildren);
 
     // Format the datetime
     let formattedDateTime = data.selected_time;
-    if (data.selected_time && !data.callNow && !formattedDateTime.includes('M')) {
+    if (
+      data.selected_time &&
+      !data.callNow &&
+      !formattedDateTime.includes("M")
+    ) {
       try {
         const date = new Date(formattedDateTime);
-        formattedDateTime = date.toLocaleString('en-US', {
-          month: '2-digit',
-          day: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
+        formattedDateTime = date.toLocaleString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
           hour12: true,
-          timeZone: data.selectedTimezone
+          timeZone: data.selectedTimezone,
         });
       } catch (error) {
-        console.error('Error formatting date:', error);
-        formattedDateTime = 'Invalid Date';
+        console.error("Error formatting date:", error);
+        formattedDateTime = "Invalid Date";
       }
     }
+
+    // Format phone numbers
+    const formattedPhone = formatUSPhoneNumber(data.phone);
+    const formattedRecipientPhone = data.recipientPhone
+      ? formatUSPhoneNumber(data.recipientPhone)
+      : undefined;
 
     // Keep the exact schema structure
     const webhookData = {
@@ -104,7 +137,7 @@ export async function POST(request: Request) {
       children: formattedChildren,
       numberChildern: formattedChildren.length,
       email: data.email,
-      phone: data.phone,
+      phone: formattedPhone,
       firstName: data.firstName,
       lastName: data.lastName,
       packageName: data.packageName,
@@ -116,38 +149,40 @@ export async function POST(request: Request) {
       planId: data.planId,
       hasRecording: data.hasRecording,
       callNow: data.callNow,
-      when: data.callNow ? 0 : (data.when || calculateHoursFromNow(new Date(data.selected_time))),
+      when: data.callNow
+        ? 0
+        : data.when || calculateHoursFromNow(new Date(data.selected_time)),
       recipientName: data.recipientName,
-      recipientPhone: data.recipientPhone,
+      recipientPhone: formattedRecipientPhone,
     };
 
-    console.log('Debug - Final webhook data:', webhookData);
+    console.log("Debug - Final webhook data:", webhookData);
 
     // Validate children data before sending
-    const invalidChildren = formattedChildren.filter(child => 
-      !child.childName || !child.childAge || !child.childGender
+    const invalidChildren = formattedChildren.filter(
+      (child) => !child.childName || !child.childAge || !child.childGender,
     );
 
     if (invalidChildren.length > 0) {
-      console.error('Invalid children data:', invalidChildren);
+      console.error("Invalid children data:", invalidChildren);
       return NextResponse.json(
-        { success: false, error: 'Missing required child information' },
-        { status: 400 }
+        { success: false, error: "Missing required child information" },
+        { status: 400 },
       );
     }
 
     // Send the webhook
-    const webhookUrl = process.env.GHL_WEBHOOK_URL;
+    const webhookUrl = process.env["GHL_WEBHOOK_URL"];
     if (!webhookUrl) {
-      throw new Error('GHL webhook URL not configured');
+      throw new Error("GHL webhook URL not configured");
     }
 
     const response = await fetch(webhookUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(webhookData)
+      body: JSON.stringify(webhookData),
     });
 
     if (!response.ok) {
@@ -156,22 +191,22 @@ export async function POST(request: Request) {
     }
 
     const responseData = await response.json();
-    console.log('GHL Response:', responseData);
+    console.log("GHL Response:", responseData);
 
     return NextResponse.json({
       success: true,
-      message: 'Webhook sent successfully',
-      data: webhookData
+      message: "Webhook sent successfully",
+      data: webhookData,
     });
-
   } catch (error) {
-    console.error('Error in webhookGHL:', error);
+    console.error("Error in webhookGHL:", error);
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to send webhook'
+        error:
+          error instanceof Error ? error.message : "Failed to send webhook",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

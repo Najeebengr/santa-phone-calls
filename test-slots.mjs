@@ -11,12 +11,12 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function fetchWithRetry(url, options, maxRetries = 3) {
   let lastResponse;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const response = await fetch(url, options);
       lastResponse = response;
-      
+
       if (response.status === 429) {
         if (attempt === maxRetries) {
           console.log('Max retries reached. Still getting rate limited.');
@@ -26,7 +26,7 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
         await delay(5000 * attempt); // Increased delay to 5 seconds * attempt
         continue;
       }
-      
+
       return response;
     } catch (error) {
       console.log(`Attempt ${attempt} failed:`, error.message);
@@ -36,29 +36,29 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
       await delay(2000 * attempt);
     }
   }
-  
+
   return lastResponse; // Return the last response if all retries failed
 }
 
 async function testGetFreeSlots() {
   try {
-    const calendarId = process.env.GHL_CALENDAR_ID;
-    const token = process.env.GHL_API_KEY;
-    
+    const calendarId = process.env["GHL_CALENDAR_ID"];
+    const token = process.env["GHL_API_KEY"];
+
     if (!calendarId || !token) {
       throw new Error('Missing required environment variables: GHL_CALENDAR_ID or GHL_API_KEY');
     }
-    
+
     // Calculate start date (today) and end date (7 days from now)
     const startDate = Date.now();
     const endDate = startDate + (7 * 24 * 60 * 60 * 1000);
 
     const url = `https://rest.gohighlevel.com/v1/appointments/slots?calendarId=${calendarId}&startDate=${startDate}&endDate=${endDate}&timezone=America/Chihuahua`;
-    
+
     console.log('Sending request to check free slots...');
     console.log('URL:', url);
     console.log('Calendar ID:', calendarId);
-    
+
     const response = await fetchWithRetry(
       url,
       {

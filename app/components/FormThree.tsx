@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import CheckoutPage from './CheckoutPage';
-import convertToSubCurrency from '../lib/convertToSubCurrency';
-import type { Child } from '@/lib/validation/schema';
+import React from "react";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import CheckoutPage from "./CheckoutPage";
+import convertToSubCurrency from "../lib/convertToSubCurrency";
+import type { Child } from "@/lib/validation/schema";
 
 // Ensure stripe key exists
-if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
-  throw new Error('Stripe public key is not defined');
+if (!process.env["NEXT_PUBLIC_STRIPE_PUBLIC_KEY"]) {
+  throw new Error("Stripe public key is not defined");
 }
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe(process.env["NEXT_PUBLIC_STRIPE_PUBLIC_KEY"]);
 
 interface FormThreeProps {
   // Package Info
@@ -89,7 +89,7 @@ function FormThree(props: FormThreeProps) {
               colorBackground: "#554735",
               colorText: "#FFFFFF",
               colorTextPlaceholder: "#FFFFFF80",
-              colorPrimary: '#ffffff',
+              colorPrimary: "#ffffff",
               fontSizeBase: "18px",
             },
             rules: {

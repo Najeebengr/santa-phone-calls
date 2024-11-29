@@ -320,6 +320,7 @@ const onSubmit = async (data: Step2FormData) => {
       price,
       planId,
       packageName: planName,
+      planName,
       hasRecording: planId === 2,
       selectedSlot: formattedDateTime,
       selectedTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,

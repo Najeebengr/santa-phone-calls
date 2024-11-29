@@ -1,11 +1,14 @@
-'use client'
+"use client";
 
 import React from "react";
 import Image from "next/image";
 import FormTwo from "./FormTwo";
 
-function InfoFormWrapper({ userInfo }: { userInfo: { childName: string; parentEmail: string; parentNumber: string } }) {
- 
+function InfoFormWrapper({
+  userInfo,
+}: {
+  userInfo: { parentName: string; parentEmail: string; parentNumber: string };
+}) {
   return (
     <div
       style={{
@@ -16,26 +19,24 @@ function InfoFormWrapper({ userInfo }: { userInfo: { childName: string; parentEm
       }}
       className="xl:w-[55vw] lg:w-[73vw] relative rounded-lg py-5 px-8 mx-auto mb-20"
     >
-     <FormTwo userInfo={userInfo} />
-      
-      <div className="relative">
-        
-      <Image
-        src="/corner_left.png"
-        width={170}
-        height={130}
-        alt="corner"
-        className="absolute bottom-0 left-0 transform -translate-x-[18.5%] translate-y-[13.5%]"
-      />
-       <Image
-        src="/corner_right.png"
-        width={170}
-        height={130}
-        alt="corner"
-        className="absolute bottom-0 right-0 transform translate-x-[18.5%] translate-y-[13.5%]"
-      />
+      <FormTwo userInfo={userInfo} />
 
-</div>
+      <div className="relative">
+        <Image
+          src="/corner_left.png"
+          width={170}
+          height={130}
+          alt="corner"
+          className="absolute bottom-0 left-0 transform -translate-x-[18.5%] translate-y-[13.5%]"
+        />
+        <Image
+          src="/corner_right.png"
+          width={170}
+          height={130}
+          alt="corner"
+          className="absolute bottom-0 right-0 transform translate-x-[18.5%] translate-y-[13.5%]"
+        />
+      </div>
     </div>
   );
 }
