@@ -1,5 +1,50 @@
 import { NextResponse } from 'next/server';
 
+// Define interfaces for the incoming data structure
+interface IncomingChild {
+  id: string;
+  name?: string;
+  age?: number;
+  gender?: string;
+  childName?: string;
+  childAge?: number;
+  childGender?: string;
+  connections?: string;
+  details?: string;
+  hobbies?: string;
+}
+
+interface WebhookRequestData {
+  id: string;
+  children: IncomingChild[];
+  email: string;
+  phone: string;
+  firstName: string;
+  lastName: string;
+  packageName: string;
+  totalAmount: number;
+  paymentStatus: string;
+  paymentId: string;
+  selected_time: string;
+  selectedTimezone: string;
+  planId: number;
+  hasRecording: boolean;
+  callNow: boolean;
+  when?: number;
+  recipientName?: string;
+  recipientPhone?: string;
+}
+
+interface FormattedChild {
+  id: string;
+  childName: string;
+  childAge: number;
+  childGender: string;
+  connections: string;
+  details: string;
+  hobbies: string;
+}
+
 function calculateHoursFromNow(date: Date): number {
   const diffInMilliseconds = date.getTime() - new Date().getTime();
   return Math.max(0, Math.ceil(diffInMilliseconds / (1000 * 60 * 60)));
@@ -7,7 +52,7 @@ function calculateHoursFromNow(date: Date): number {
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
+    const data = await request.json() as WebhookRequestData;
     
     console.log('Debug - Raw incoming data:', data);
 
@@ -21,12 +66,11 @@ export async function POST(request: Request) {
     }
 
     // Format children data according to schema
-    // Keep existing fields if they're already in the correct format
-    const formattedChildren = data.children.map(child => ({
+    const formattedChildren: FormattedChild[] = data.children.map((child: IncomingChild) => ({
       id: child.id,
-      childName: child.childName || child.name, // Handle both formats
-      childAge: child.childAge || child.age,    // Handle both formats
-      childGender: child.childGender || child.gender,
+      childName: child.childName || child.name || '',
+      childAge: child.childAge || child.age || 0,
+      childGender: child.childGender || child.gender || '',
       connections: child.connections || '',
       details: child.details || '',
       hobbies: child.hobbies || '',

@@ -27,9 +27,8 @@ import Loader from "./Loader";
 
 function FormTwo() {
   const router = useRouter();
-  const [date, setDate] = React.useState<Date>(new Date());
+  // Remove unused date state since selectedTime is being used instead
   const [loading, setLoading] = useState(false);
-  const [userInfo, setUserInfo] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [sendAsGift, setSendAsGift] = useState(false);
   const [isScheduled, setIsScheduled] = useState(false);
@@ -51,8 +50,7 @@ function FormTwo() {
       id: generateId(),
       children: [
         {
-          id: generateId(), // Add id here
-
+          id: generateId(),
           name: "",
           gender: "Male",
           age: 1,
@@ -80,7 +78,7 @@ function FormTwo() {
     return `${hour}:${minute}`;
   }
 
-  const getCurrentUser = () => {
+  const getCurrentUser = React.useCallback(() => {
     try {
       const storedData = localStorage.getItem('userFormData');
       if (!storedData) {
@@ -91,18 +89,15 @@ function FormTwo() {
 
       const userData = JSON.parse(storedData);
       setParentData(userData);
-      // Remove the following lines:
-      // setUserInfo(userData.childName || "");
-      // setValue("children.0.name", userData.childName);
     } catch (error) {
       console.error('Error retrieving user data:', error);
       toast.error('An unexpected error occurred');
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     getCurrentUser();
-  }, []);
+  }, [getCurrentUser]);
 
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
@@ -136,13 +131,7 @@ const addAnotherChild = () => {
   });
 };
 
-  const calculateHoursFromNow = (date: Date, time: string): number => {
-    const [hours, minutes] = time.split(':').map(Number);
-    const scheduledDate = new Date(date);
-    scheduledDate.setHours(hours, minutes);
-    const diffInMilliseconds = scheduledDate.getTime() - new Date().getTime();
-    return Math.max(0, Math.ceil(diffInMilliseconds / (1000 * 60 * 60)));
-  };
+
 
   // Update the calculatePrice function in FormTwo
 const calculatePrice = (childrenCount: number, hasRecording: boolean): { price: number; planId: number; planName: string } => {
@@ -323,7 +312,6 @@ const onSubmit = async (data: Step2FormData) => {
       try {
         let scheduledDate: Date;
 
-        // Check if the time is in ISO format
         if (selectedTime.includes('T')) {
           // Handle ISO format (2024-11-29T10:30:00+05:00)
           scheduledDate = new Date(selectedTime);
@@ -333,8 +321,8 @@ const onSubmit = async (data: Step2FormData) => {
           if (!dateTimeParts) {
             throw new Error('Invalid date/time format');
           }
-
-          const [_, hour, meridiem, month, day, year] = dateTimeParts;
+      
+          const [, hour, meridiem, month, day, year] = dateTimeParts; // Remove unused _ variable
           const months = {
             January: 0, February: 1, March: 2, April: 3, May: 4, June: 5,
             July: 6, August: 7, September: 8, October: 9, November: 10, December: 11
@@ -394,10 +382,11 @@ const onSubmit = async (data: Step2FormData) => {
     });
 
     const checkoutData: CheckoutData = {
+      totalAmount: price,          // Add this line
       id: data.id,
       price,
       planId,
-      planName,
+      packageName: planName,
       hasRecording: planId === 2,
       selectedSlot: formattedDateTime,
       selectedTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -406,8 +395,8 @@ const onSubmit = async (data: Step2FormData) => {
       parentPhone: parentData.parentPhone,
       children: data.children.map(child => ({
         id: child.id,
-        name: child.name,       // Include name
-        age: child.age,         // Include age
+        name: child.name,
+        age: child.age,
         gender: child.gender,
         connections: child.connections || '',
         details: child.details || '',
@@ -418,7 +407,6 @@ const onSubmit = async (data: Step2FormData) => {
       recipientName: data.recipientName || undefined,
       recipientPhone: data.recipientPhone || undefined,
     };
-
 // After creating checkoutData:
 console.log('Debug - Checkout Data:', {
   children: checkoutData.children,
@@ -594,18 +582,17 @@ console.log('Debug - Checkout Data:', {
         {isScheduled && (
           <div className="flex flex-col gap-4 mt-4">
             <div className="flex w-full flex-col gap-1">
-              <CustomCalendar
-                onDateTimeSelect={(selectedDate, time) => {
-                  setDate(selectedDate);
-                  setSelectedTime(time);
-                  setValue("scheduledDate", selectedDate.toString(), {
-                    shouldValidate: false,
-                  });
-                  setValue("scheduledTime", time, {
-                    shouldValidate: false,
-                  });
-                }}
-              />
+            <CustomCalendar
+      onDateTimeSelect={(_, time) => {
+        setSelectedTime(time);
+        setValue("scheduledDate", new Date(time).toString(), {
+          shouldValidate: false,
+        });
+        setValue("scheduledTime", time, {
+          shouldValidate: false,
+        });
+      }}
+    />
             </div>
           </div>
         )}

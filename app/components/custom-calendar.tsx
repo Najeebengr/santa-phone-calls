@@ -117,7 +117,7 @@ export function CustomCalendar({ onDateTimeSelect, className }: CalendarProps) {
   }
 
   return (
-    <div className="w-full max-w-[800px] mx-auto pt-8">
+    <div className={cn("w-full max-w-[800px] mx-auto pt-8", className)}>
       <div className="flex flex-col md:flex-row items-start justify-center gap-8">
         <div className="w-[343px] mx-auto">
           <div className="w-full rounded-xl border-[3px] border-[rgba(217,201,153,0.8)] bg-gradient-to-b from-[#51422F] to-[#121212] shadow-[inset_0px_0px_40px_rgba(0,0,0,0.5)] overflow-hidden">
@@ -170,10 +170,11 @@ export function CustomCalendar({ onDateTimeSelect, className }: CalendarProps) {
                     {day && (
                       <button
                         onClick={(e) => handleDateClick(day, e)}
-                        disabled={!hasAvailableSlots(day)}
+                        disabled={!hasAvailableSlots(day) || isLoading}
                         className={cn(
                           "w-8 h-8 rounded-full flex items-center justify-center text-white font-['Harmonia_Sans_Pro_Cyr'] text-lg",
                           !hasAvailableSlots(day) && "opacity-50 cursor-not-allowed",
+                          isLoading && "cursor-wait",
                           selectedDate?.getDate() === day &&
                           selectedDate?.getMonth() === currentDate.getMonth() &&
                           "bg-gradient-to-r from-[#D7C798] via-[#EDE4CC] to-[#D7C798] text-[#3A3022] font-bold"
@@ -196,12 +197,12 @@ export function CustomCalendar({ onDateTimeSelect, className }: CalendarProps) {
               className="text-lg font-semibold font-seasons mb-3 block"
               style={{ textShadow: "0 0 20px #FCCC73" }}
             >
-              Scheduled Time
+              {isLoading ? "Loading..." : "Scheduled Time"}
             </label>
             <div className="bg-[#554735] border-[1px] border-[#827E4B] rounded-full py-3 px-6 text-white font-harmonia text-center">
               {selectedTime && selectedDate 
                 ? `${format(new Date(selectedTime), 'ha')} ${format(selectedDate, 'MMMM d yyyy')}` 
-                : "Select a date and time"}
+                : isLoading ? "Loading available slots..." : "Select a date and time"}
             </div>
           </div>
           
@@ -212,26 +213,30 @@ export function CustomCalendar({ onDateTimeSelect, className }: CalendarProps) {
               </h3>
               <div className="h-[280px] overflow-y-auto pr-2 custom-scrollbar">
                 <div className="grid grid-cols-3 gap-3">
-                  {availableSlots[format(selectedDate, 'yyyy-MM-dd')]?.slots.map((time) => (
-                    <button
-                      key={time}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setSelectedTime(time);
-                        if (onDateTimeSelect && selectedDate) {
-                          onDateTimeSelect(selectedDate, time);
-                        }
-                      }}
-                      className={cn(
-                        "py-2.5 px-3 text-sm rounded-lg text-white font-['Harmonia_Sans_Pro_Cyr'] transition-all",
-                        selectedTime === time
-                          ? "bg-gradient-to-r from-[#D7C798] via-[#EDE4CC] to-[#D7C798] text-[#3A3022] shadow-[0_0_20px_rgba(215,199,152,0.3)]"
-                          : "bg-[#51422F] hover:bg-[#61523F]"
-                      )}
-                    >
-                      {format(new Date(time), 'h:mm a')}
-                    </button>
-                  ))}
+                  {isLoading ? (
+                    <div className="col-span-3 text-center text-white">Loading available times...</div>
+                  ) : (
+                    availableSlots[format(selectedDate, 'yyyy-MM-dd')]?.slots.map((time) => (
+                      <button
+                        key={time}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setSelectedTime(time);
+                          if (onDateTimeSelect && selectedDate) {
+                            onDateTimeSelect(selectedDate, time);
+                          }
+                        }}
+                        className={cn(
+                          "py-2.5 px-3 text-sm rounded-lg text-white font-['Harmonia_Sans_Pro_Cyr'] transition-all",
+                          selectedTime === time
+                            ? "bg-gradient-to-r from-[#D7C798] via-[#EDE4CC] to-[#D7C798] text-[#3A3022] shadow-[0_0_20px_rgba(215,199,152,0.3)]"
+                            : "bg-[#51422F] hover:bg-[#61523F]"
+                        )}
+                      >
+                        {format(new Date(time), 'h:mm a')}
+                      </button>
+                    ))
+                  )}
                 </div>
               </div>
             </div>

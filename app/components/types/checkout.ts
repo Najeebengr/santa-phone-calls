@@ -9,26 +9,20 @@ export interface Child {
   }
   
   export interface CheckoutPageProps {
-    // Payment Info
+    id: string;
     packageName: string;
+    price: number;
     totalAmount: number;
     planId: number;
     hasRecording: boolean;
-  
-    // Contact Info
-    parentName: string;
-    parentEmail: string;
-    parentPhone: string;
-    
-    // Children Info
-    children: Child[];
-    
-    // Appointment Info
     selectedSlot: string;
     selectedTimezone: string;
+    parentEmail: string;
+    parentPhone: string;
+    parentName: string;
+    children: Array<Child>;
     callNow: boolean;
     when?: number | null;
-
     recipientName?: string;
     recipientPhone?: string;
   }

@@ -8,20 +8,21 @@ import { TRACKING_IDS } from './config/tracking';
 const harmoniaSans = localFont({
   src: [
     {
-      path: "../public/fonts/HarmoniaSansProCyr-Regular.otf", // Absolute path from `public`
+      path: "../public/fonts/HarmoniaSansProCyr-Regular.otf",
       weight: "300"
     }
   ],
   variable: "--font-harmonia-sans",
 });
+
 const theSeasons = localFont({
   src: [
     {
-      path: "../public/fonts/Fontspring-DEMO-theseasons-bd.otf", // Absolute path from `public`
+      path: "../public/fonts/Fontspring-DEMO-theseasons-bd.otf",
       weight: "900"
     },
     {
-      path: "../public/fonts/Fontspring-DEMO-theseasons-lt.otf", // Absolute path from `public`
+      path: "../public/fonts/Fontspring-DEMO-theseasons-lt.otf",
       weight: "400"
     }
   ],
@@ -83,6 +84,7 @@ export default function RootLayout({
           `}
         </Script>
         <noscript>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
             height="1" 
             width="1" 
@@ -93,7 +95,7 @@ export default function RootLayout({
         </noscript>
       </head>
       <body
-        className={`${harmoniaSans.variable}  ${theSeasons.variable} antialiased`}
+        className={`${harmoniaSans.variable} ${theSeasons.variable} antialiased`}
       >
         <Toaster position="top-right" reverseOrder={false} />
         {children}

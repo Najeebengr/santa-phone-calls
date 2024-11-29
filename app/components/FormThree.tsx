@@ -38,6 +38,7 @@ interface FormThreeProps {
 interface CheckoutPageProps {
   id: string;
   packageName: string;
+  price: number;
   totalAmount: number;
   planId: number;
   hasRecording: boolean;
@@ -57,6 +58,7 @@ function FormThree(props: FormThreeProps) {
   // Map props to match CheckoutPage requirements
   const checkoutProps: CheckoutPageProps = {
     id: props.id,
+    price: props.price,
     packageName: props.planName,
     totalAmount: props.price,
     planId: props.planId,

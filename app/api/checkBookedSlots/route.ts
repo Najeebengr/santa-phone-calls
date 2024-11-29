@@ -4,6 +4,21 @@ const GHL_API_KEY = process.env.GHL_API_KEY;
 const GHL_CALENDAR_ID = process.env.GHL_CALENDAR_ID;
 const DEFAULT_TIMEZONE = "America/New_York";
 
+// Define types for the API response
+interface TimeSlot {
+  startTime: string;
+  endTime: string;
+}
+
+interface DaySlots {
+  slots: TimeSlot[];
+  date: string;
+}
+
+interface GHLResponse {
+  [date: string]: DaySlots;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { timezone = DEFAULT_TIMEZONE } = await req.json();
@@ -34,11 +49,11 @@ export async function POST(req: NextRequest) {
       throw new Error(`GHL API error: ${ghlResponse.statusText}\nDetails: ${errorText}`);
     }
 
-    const ghlData = await ghlResponse.json();
+    const ghlData: GHLResponse = await ghlResponse.json();
     console.log('GHL API response:', JSON.stringify(ghlData, null, 2));
 
-    // Calculate total available slots
-    const totalSlots = Object.values(ghlData).reduce((total: number, day: any) => total + day.slots.length, 0);
+    // Calculate total available slots with proper typing
+    const totalSlots = Object.values(ghlData).reduce((total: number, day: DaySlots) => total + day.slots.length, 0);
     console.log('Total available slots:', totalSlots);
 
     // Format the response
