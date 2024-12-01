@@ -44,6 +44,13 @@ function Info() {
 
   return (
     <section className="bg-[url('/christmas.jpeg')] bg-cover bg-center bg-no-repeat min-h-screen w-full px-6 lg:px-6 xl:px-0 py-10 mx-auto relative z-10">
+      <div
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 50%)",
+        }}
+        className="absolute inset-0"
+      ></div>
       <div className="relative z-30">
         <h2 className="text-4xl md:text-6xl 2xl:text-7xl font-black text-center font-seasons text-white">
           Personalize the Conversation
@@ -52,7 +59,7 @@ function Info() {
           This part makes the call amazing
         </p>
       </div>
-      <div>
+      <div className="relative z-30">
         <InfoFormWrapper userInfo={userInfo} />
       </div>
     </section>

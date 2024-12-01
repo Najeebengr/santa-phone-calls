@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
-// Define interfaces for the incoming data structure
-interface IncomingChild {
+const SUPABASE_URL = process.env["NEXT_PUBLIC_SUPABASE_URL"];
+const SUPABASE_ANON_KEY = process.env["NEXT_PUBLIC_SUPABASE_ANON_KEY"];
+
+// Interfaces
+interface Child {
   id: string;
   name?: string;
   age?: number;
@@ -14,62 +18,9 @@ interface IncomingChild {
   hobbies?: string;
 }
 
-interface WebhookRequestData {
-  id: string;
-  children: IncomingChild[];
-  email: string;
-  phone: string;
-  firstName: string;
-  lastName: string;
-  packageName: string;
-  totalAmount: number;
-  paymentStatus: string;
-  paymentId: string;
-  selected_time: string;
-  selectedTimezone: string;
-  planId: number;
-  hasRecording: boolean;
-  callNow: boolean;
-  when?: number;
-  recipientName?: string;
-  recipientPhone?: string;
-}
-
-interface FormattedChild {
-  id: string;
-  childName: string;
-  childAge: number;
-  childGender: string;
-  FamilySocialConnections: string;
-  HolidaySpecificDetails: string;
-  InterestsAndHobbies: string;
-}
-
-function calculateHoursFromNow(date: Date): number {
-  const diffInMilliseconds = date.getTime() - new Date().getTime();
-  return Math.max(0, Math.ceil(diffInMilliseconds / (1000 * 60 * 60)));
-}
-
-function formatUSPhoneNumber(phone: string): string {
-  // Remove all non-numeric characters
-  const cleaned = phone.replace(/\D/g, "");
-
-  // Check if it's a US number (10 digits)
-  if (cleaned.length === 10) {
-    return `+1${cleaned}`;
-  }
-
-  // If it already has the country code (11 digits starting with 1)
-  if (cleaned.length === 11 && cleaned.startsWith("1")) {
-    return `+${cleaned}`;
-  }
-
-  // Return original if not a valid US number
-  return phone;
-}
 export async function POST(request: Request) {
   try {
-    const data = (await request.json()) as WebhookRequestData;
+    const data = await request.json();
 
     console.log("Debug - Raw incoming data:", data);
 
@@ -87,21 +38,17 @@ export async function POST(request: Request) {
     }
 
     // Format children data according to schema
-    const formattedChildren: FormattedChild[] = data.children.map(
-      (child: IncomingChild) => ({
-        id: child.id,
-        childName: child.childName || child.name || "",
-        childAge: child.childAge || child.age || 0,
-        childGender: child.childGender || child.gender || "",
-        FamilySocialConnections: child.connections || "",
-        HolidaySpecificDetails: child.details || "",
-        InterestsAndHobbies: child.hobbies || "",
-      }),
-    );
+    const formattedChildren = data.children.map((child: Child) => ({
+      id: child.id,
+      childName: child.childName || child.name || "",
+      childAge: child.childAge || child.age || 0,
+      childGender: child.childGender || child.gender || "",
+      connections: child.connections || "",
+      details: child.details || "",
+      hobbies: child.hobbies || "",
+    }));
 
-    console.log("Debug - Formatted children:", formattedChildren);
-
-    // Format the datetime
+    // Format datetime
     let formattedDateTime = data.selected_time;
     if (
       data.selected_time &&
@@ -131,7 +78,7 @@ export async function POST(request: Request) {
       ? formatUSPhoneNumber(data.recipientPhone)
       : undefined;
 
-    // Keep the exact schema structure
+    // Prepare webhook data
     const webhookData = {
       id: data.id,
       children: formattedChildren,
@@ -147,7 +94,7 @@ export async function POST(request: Request) {
       selected_time: formattedDateTime,
       selectedTimezone: data.selectedTimezone,
       planId: data.planId,
-      hasRecording: data.hasRecording,
+      recording: data.hasRecording,
       callNow: data.callNow,
       when: data.callNow
         ? 0
@@ -156,11 +103,10 @@ export async function POST(request: Request) {
       recipientPhone: formattedRecipientPhone,
     };
 
-    console.log("Debug - Final webhook data:", webhookData);
-
-    // Validate children data before sending
+    // Validate children data
     const invalidChildren = formattedChildren.filter(
-      (child) => !child.childName || !child.childAge || !child.childGender,
+      (child: Child) =>
+        !child.childName || !child.childAge || !child.childGender,
     );
 
     if (invalidChildren.length > 0) {
@@ -171,42 +117,59 @@ export async function POST(request: Request) {
       );
     }
 
-    // Send the webhook
-    const webhookUrl = process.env["GHL_WEBHOOK_URL"];
-    if (!webhookUrl) {
-      throw new Error("GHL webhook URL not configured");
+    // Initialize Supabase client
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      throw new Error("Supabase configuration missing");
     }
 
-    const response = await fetch(webhookUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(webhookData),
-    });
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    if (!response.ok) {
-      const responseText = await response.text();
-      throw new Error(`Failed to send webhook to GHL: ${responseText}`);
+    // Call the Supabase Edge Function
+    const { data: functionResponse, error: functionError } =
+      await supabase.functions.invoke("webhook-handler", {
+        body: JSON.stringify(webhookData),
+      });
+
+    if (functionError) {
+      throw new Error(`Edge function error: ${functionError.message}`);
     }
 
-    const responseData = await response.json();
-    console.log("GHL Response:", responseData);
+    console.log("Edge Function Response:", functionResponse);
 
     return NextResponse.json({
       success: true,
-      message: "Webhook sent successfully",
-      data: webhookData,
+      message: "Webhook processed successfully",
+      data: functionResponse,
     });
   } catch (error) {
-    console.error("Error in webhookGHL:", error);
+    console.error("Error in webhook handler:", error);
     return NextResponse.json(
       {
         success: false,
         error:
-          error instanceof Error ? error.message : "Failed to send webhook",
+          error instanceof Error ? error.message : "Failed to process webhook",
       },
       { status: 500 },
     );
   }
+}
+
+// Utility functions
+function calculateHoursFromNow(date: Date): number {
+  const diffInMilliseconds = date.getTime() - new Date().getTime();
+  return Math.max(0, Math.ceil(diffInMilliseconds / (1000 * 60 * 60)));
+}
+
+function formatUSPhoneNumber(phone: string): string {
+  const cleaned = phone.replace(/\D/g, "");
+
+  if (cleaned.length === 10) {
+    return `+1${cleaned}`;
+  }
+
+  if (cleaned.length === 11 && cleaned.startsWith("1")) {
+    return `+${cleaned}`;
+  }
+
+  return phone;
 }

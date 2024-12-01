@@ -10,37 +10,46 @@ function Checkout() {
   const [activePlan, setActivePlan] = useState(plans[1].id);
   const [price, setPrice] = useState(plans[1].price);
   const [planName, setPlanName] = useState(plans[1].name);
-  const [hasRecordingAddon, setHasRecordingAddon] = useState(false);
   const [childrenCount, setChildrenCount] = useState(1);
-
+  const [childName, setChildName] = useState("");
 
   useEffect(() => {
-    const checkoutData = typeof window !== 'undefined' ? localStorage.getItem('checkoutData') : null;
+    const checkoutData =
+      typeof window !== "undefined"
+        ? localStorage.getItem("checkoutData")
+        : null;
     if (checkoutData) {
       const parsedData = JSON.parse(checkoutData);
       const numChildren = parsedData.children?.length || 1;
       setChildrenCount(numChildren);
-      
-      // Set initial plan and price
+      setChildName(parsedData.children[0].name);
+
+      let selectedPlan;
       if (numChildren > 1) {
         // Family bundle
-        const familyPlan = plans[2];
-        const basePrice = familyPlan.price;
-        const finalPrice = parsedData.hasRecording ? basePrice + 5 : basePrice;
-        
-        setActivePlan(familyPlan.id);
-        setPrice(finalPrice);
-        setPlanName(familyPlan.name);
-        setHasRecordingAddon(parsedData.hasRecording);
+        selectedPlan = plans[2];
       } else {
-        // Single child - either basic or recording plan
-        const selectedPlan = parsedData.hasRecording ? plans[1] : plans[0];
-        
-        setActivePlan(selectedPlan.id);
-        setPrice(selectedPlan.price);
-        setPlanName(selectedPlan.name);
-        setHasRecordingAddon(parsedData.hasRecording);
+        // Default to second plan for single child
+        selectedPlan = plans[1];
       }
+
+      // Update both state and localStorage
+      setActivePlan(selectedPlan.id);
+      setPrice(selectedPlan.price);
+      setPlanName(selectedPlan.name);
+
+      // Update localStorage with the correct initial plan details
+      const updatedData = {
+        ...parsedData,
+        planId: selectedPlan.id,
+        planName: selectedPlan.name,
+        price: selectedPlan.price,
+        totalAmount: selectedPlan.price,
+        hasRecording:
+          selectedPlan.id === plans[1].id || selectedPlan.id === plans[2].id,
+        packageName: selectedPlan.name,
+      };
+      localStorage.setItem("checkoutData", JSON.stringify(updatedData));
     }
   }, []);
 
@@ -55,68 +64,28 @@ function Checkout() {
       setActivePlan(id);
       setPrice(selectedPlan.price);
       setPlanName(selectedPlan.name);
-      setHasRecordingAddon(false);
+
+      // Update checkout data in localStorage
+      const checkoutData = localStorage.getItem("checkoutData");
+      if (checkoutData) {
+        const parsedData = JSON.parse(checkoutData);
+        const updatedData = {
+          ...parsedData,
+          planId: selectedPlan.id,
+          planName: selectedPlan.name,
+          packageName: selectedPlan.name,
+          hasRecording: id === plans[1].id || id === plans[2].id,
+          totalAmount: selectedPlan.price,
+          price: selectedPlan.price,
+        };
+        localStorage.setItem("checkoutData", JSON.stringify(updatedData));
+      }
     }
   };
 
-  const handleRecordingAddonChange = (checked: boolean) => {
-    setHasRecordingAddon(checked);
-    
-    // Get current checkout data
-    const checkoutData = localStorage.getItem('checkoutData');
-    if (checkoutData) {
-      const parsedData = JSON.parse(checkoutData);
-      
-      // Calculate new total based on plan and recording addon
-      let newTotal = price;  // Base price from current plan
-      
-      // Add recording fee if checked and applicable
-      if (checked) {
-        // Family bundle (plans[2]) or basic plan (plans[0])
-        if (parsedData.children.length > 1) {
-          // For family bundle, add $5 if recording is selected
-          newTotal += 5;
-        } else {
-          // For single child, switch to recording plan price (plans[1])
-          newTotal = plans[1].price;
-        }
-      }
-      
-      // Update the data
-      const updatedData = {
-        ...parsedData,
-        hasRecording: checked,
-        totalAmount: newTotal,
-        price: newTotal  // Update both price and totalAmount
-      };
-      
-      console.log('Debug - Price Update:', {
-        original: parsedData.totalAmount,
-        new: newTotal,
-        hasRecording: checked,
-        childCount: parsedData.children.length
-      });
-  
-      // Save updated data
-      localStorage.setItem('checkoutData', JSON.stringify(updatedData));
-      
-      // Update state
-      setPrice(newTotal);
-    }
-  };
-  const calculateTotal = () => {
-    let total = price;
-    if (hasRecordingAddon) {
-      // Add recording fee for family bundle (plans[2])
-      if (childrenCount > 1) {
-        total += 5;
-      }
-      // For single child, price should already be updated to recording plan price
-    }
-    return total.toFixed(2);
-  };
   // Get stored checkout data if it exists
-  const checkoutData = typeof window !== 'undefined' ? localStorage.getItem('checkoutData') : null;
+  const checkoutData =
+    typeof window !== "undefined" ? localStorage.getItem("checkoutData") : null;
   const parsedData = checkoutData ? JSON.parse(checkoutData) : null;
 
   // If no stored data is found, don't render the form
@@ -129,16 +98,18 @@ function Checkout() {
   }
 
   const formThreeProps = {
-    price: Number(calculateTotal()),
+    price: price,
     planName: planName,
     planId: activePlan,
-    ...parsedData, // Spread the stored form data
-    hasRecording: hasRecordingAddon,
-
+    ...parsedData,
+    hasRecording: activePlan === plans[1].id || activePlan === plans[2].id, // Set hasRecording based on plan
   };
 
   return (
-    <section style = {{height: "100%"}} className="lg:bg-cover bg-center bg-no-repeat h-full lg:h-screen w-full bg-[url('/christmas.jpeg')] py-10 lg:py-5 xl:py-10 px-6 lg:px-6 md:px-0 mx-auto relative z-10">
+    <section
+      style={{ height: "100%" }}
+      className="lg:bg-cover bg-center bg-no-repeat h-full lg:h-screen w-full bg-[url('/christmas.jpeg')] py-10 lg:py-5 xl:py-10 px-6 lg:px-6 md:px-0 mx-auto relative z-10"
+    >
       <div
         style={{
           background:
@@ -152,11 +123,11 @@ function Checkout() {
           style={{ textShadow: "0 0 20px #FCCC73" }}
           className="text-4xl md:text-4xl 2xl:text-5xl font-black text-center font-seasons  text-white"
         >
-          Jimmy&lsquo;s Live Call with Santa is <br />
-          Just One Step Away
+          {childName}&lsquo;s Live Call is <br />
+          One Step Away
         </h2>
       </div>
-      <div className="flex  flex-col-reverse lg:flex-row px-6 lg:px-0 container mx-auto gap-4 my-5 lg:my-5 xl:my-5">
+      <div className="flex  flex-col lg:flex-row px-2 lg:px-0 container mx-auto gap-4 my-5 lg:my-5 xl:my-5">
         <div
           style={{
             background:
@@ -174,7 +145,7 @@ function Checkout() {
               {planName}
             </p>
             <p className="my-2 font-harmonia text-base text-[#FFFFFF80]">
-              Jimmy is going to receive from that will talk about xxxxx
+              Jimmy is going to receive from Santa and he will talk about...
             </p>
           </div>
           <div className="total my-5">
@@ -182,23 +153,9 @@ function Checkout() {
               <p>Talk to Santa</p>
               <p>${price.toFixed(2)}</p>
             </div>
-            {(activePlan === 1 || activePlan === 3) && (
-              <div className="font-harmonia py-2 text-[#FFFFFF80] border-b-[1px] border-white text-xl flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={hasRecordingAddon}
-                    onChange={(e) => handleRecordingAddonChange(e.target.checked)}
-                    className="w-4 h-4 accent-[#D7C798]"
-                  />
-                  <p>Add Recording</p>
-                </div>
-                <p>${hasRecordingAddon ? "5.00" : "0.00"}</p>
-              </div>
-            )}
             <div className="font-harmonia py-3 text-white text-xl flex justify-between items-center">
               <p>Total</p>
-              <p>${calculateTotal()}</p>
+              <p>${price.toFixed(2)}</p>
             </div>
           </div>
           <FormThree {...formThreeProps} />
@@ -225,22 +182,25 @@ function Checkout() {
           <div className="spacer h-20"></div>
         </div>
         <div className="plans flex flex-col gap-3 basis-2/4">
-      {plans.map((plan: Plan) => (
-        <div
-          key={plan.id}
-          onClick={() => handlePlanChange(plan.id)}
-          style={{
-            background:
-              activePlan === plan.id
-                ? " #695438"
-                : "linear-gradient(176.55deg, #51422F -9.63%, #121212 97.16%)",
-            border: "3px solid #D9C999CC",
-            boxShadow: "0px 0px 40px 0px #00000080 inset",
-            opacity: childrenCount > 1 && plan.id !== plans[2].id ? 0.5 : 1,
-            cursor: childrenCount > 1 && plan.id !== plans[2].id ? 'not-allowed' : 'pointer',
-          }}
-          className=" h-[50%] relative flex flex-col gap-10 lg:gap-5 xl:gap-10 rounded-lg py-5"
-        >
+          {plans.map((plan: Plan) => (
+            <div
+              key={plan.id}
+              onClick={() => handlePlanChange(plan.id)}
+              style={{
+                background:
+                  activePlan === plan.id
+                    ? " #695438"
+                    : "linear-gradient(176.55deg, #51422F -9.63%, #121212 97.16%)",
+                border: "3px solid #D9C999CC",
+                boxShadow: "0px 0px 40px 0px #00000080 inset",
+                opacity: childrenCount > 1 && plan.id !== plans[2].id ? 0.5 : 1,
+                cursor:
+                  childrenCount > 1 && plan.id !== plans[2].id
+                    ? "not-allowed"
+                    : "pointer",
+              }}
+              className=" h-[50%] relative flex flex-col gap-10 lg:gap-5 xl:gap-10 rounded-lg py-5"
+            >
               {activePlan === plan.id && (
                 <Image
                   src="CheckCircle.svg"

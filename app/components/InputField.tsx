@@ -1,15 +1,26 @@
-import React from 'react';
+import React from "react";
 
 interface InputFieldProps {
   label: string;
-  type?: string ;
+  type?: string;
   placeholder: string;
   value?: string | number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  defaultValue?: number | string; // Add this line
+
   extraStyles?: string;
 }
 
-const InputField: React.FC<InputFieldProps> = ({ label, type, placeholder, value, onChange, extraStyles, ...rest }) => {
+const InputField: React.FC<InputFieldProps> = ({
+  label,
+  type,
+  defaultValue,
+  placeholder,
+  value,
+  onChange,
+  extraStyles,
+  ...rest
+}) => {
   return (
     <div className={`w-full ${extraStyles}`}>
       <label
@@ -22,8 +33,9 @@ const InputField: React.FC<InputFieldProps> = ({ label, type, placeholder, value
         type={type}
         placeholder={placeholder}
         value={value}
+        defaultValue={defaultValue}
         onChange={onChange}
-        className="bg-[#554735] border-[1px] border-[#827E4B] my-2 py-2.5 px-4 text-white placeholder:text-white font-harmonia text-lg font-normal focus:outline-none w-full rounded-full"
+        className="bg-[#554735] border-[1px] border-[#827E4B] my-2 py-2.5 px-4 text-white placeholder:text-white font-harmonia text-lg font-normal focus:outline-none w-full rounded-full placeholder:font-seasons"
         {...rest}
       />
     </div>

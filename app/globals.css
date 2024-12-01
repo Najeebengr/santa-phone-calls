@@ -2,20 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Seasons';
-  src: url('../public/fonts/Fontspring-DEMO-theseasons-bd.otf') format('opentype');
+/* @font-face {
+  font-family: 'Harmonia';
+  src: url('../public/fonts/HarmoniaSansProCyr-Regular.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }
-body {
-  font-family:  Arial, Helvetica, sans-serif;
+
+@font-face {
+  font-family: 'Seasons';
+  src: url('../public/fonts/Fontspring-DEMO-theseasons-bd.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
 }
+
+@font-face {
+  font-family: 'Seasons';
+  src: url('../public/fonts/Fontspring-DEMO-theseasons-lt.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+ */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+
 .custom-input {
   width: 100%;
   padding: 10px;
   font-size: 16px;
-  border: 2px solid #827E4B; /* Custom border color */
+  border: 2px solid #827E4B;
   border-radius: 8px;
   background-color: #f9f9f9;
   color: #333;
@@ -24,30 +42,30 @@ body {
 
 .custom-input:focus {
   outline: none;
-  border-color: #554735; /* Border color on focus */
+  border-color: #554735;
   box-shadow: 0 0 5px rgba(85, 71, 53, 0.8);
 }
 
 .custom-calendar {
-  background-color: #ffffff; /* Background for the calendar */
-  border: 2px solid #827E4B; /* Border color for the calendar */
+  background-color: #ffffff;
+  border: 2px solid #827E4B;
   border-radius: 8px;
   padding: 10px;
   font-family: Arial, sans-serif;
 }
 
 .react-datepicker__day--selected {
-  background-color: #C70A27; /* Background for selected day */
-  color: #fff; /* Text color for selected day */
+  background-color: #C70A27;
+  color: #fff;
 }
 
 .react-datepicker__day--keyboard-selected {
-  background-color: #7B0F10; /* Keyboard navigation highlight */
+  background-color: #7B0F10;
   color: #fff;
 }
 
 .react-datepicker__day:hover {
-  background-color: #D9C999; /* Hover background for days */
+  background-color: #D9C999;
   color: #000;
 }
 
@@ -71,6 +89,8 @@ body {
 
 @layer base {
   :root {
+    --font-the-seasons: 'Seasons', sans-serif;
+    --font-harmonia-sans: 'Harmonia', serif;
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
@@ -97,6 +117,7 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -129,6 +150,7 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }

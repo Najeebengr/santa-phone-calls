@@ -86,6 +86,7 @@ function FormThree(props: FormThreeProps) {
           appearance: {
             theme: "night",
             variables: {
+              fontSizeSm: "10px",
               colorBackground: "#554735",
               colorText: "#FFFFFF",
               colorTextPlaceholder: "#FFFFFF80",

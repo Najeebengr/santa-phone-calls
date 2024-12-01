@@ -1,73 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
-const GHL_API_KEY = process.env.GHL_API_KEY;
-const GHL_CALENDAR_ID = process.env.GHL_CALENDAR_ID;
-const DEFAULT_TIMEZONE = "America/New_York";
+const SUPABASE_URL = process.env["NEXT_PUBLIC_SUPABASE_URL"];
+const SUPABASE_ANON_KEY = process.env["NEXT_PUBLIC_SUPABASE_ANON_KEY"];
 
-// Define types for the API response
-interface TimeSlot {
-  startTime: string;
-  endTime: string;
-}
-
-interface DaySlots {
-  slots: TimeSlot[];
-  date: string;
-}
-
-interface GHLResponse {
-  [date: string]: DaySlots;
-}
+const DEFAULT_TIMEZONE = "America/Los_Angeles";
 
 export async function POST(req: NextRequest) {
   try {
-    const { timezone = DEFAULT_TIMEZONE } = await req.json();
+    const { timezone, startDate, endDate } = await req.json();
 
-    // Get current date and 7 days from now in epoch timestamps
-    const startDate = Date.now();
-    const endDate = startDate + (20 * 24 * 60 * 60 * 1000);
+    // Use provided timezone or fallback to default
+    const userTimezone = timezone || DEFAULT_TIMEZONE;
 
-    console.log('Start date:', startDate);
-    console.log('End date:', endDate);
-
-    const apiUrl = `https://rest.gohighlevel.com/v1/appointments/slots?calendarId=${GHL_CALENDAR_ID}&startDate=${startDate}&endDate=${endDate}&timezone=${timezone}`;
-
-    console.log('Making GHL API request to:', apiUrl);
-
-    const ghlResponse = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${GHL_API_KEY}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!ghlResponse.ok) {
-      const errorText = await ghlResponse.text();
-      console.error('GHL API error response:', errorText);
-      throw new Error(`GHL API error: ${ghlResponse.statusText}\nDetails: ${errorText}`);
+    // Validate Supabase configuration
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      throw new Error("Server configuration error");
     }
 
-    const ghlData: GHLResponse = await ghlResponse.json();
-    console.log('GHL API response:', JSON.stringify(ghlData, null, 2));
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Calculate total available slots with proper typing
-    const totalSlots = Object.values(ghlData).reduce((total: number, day: DaySlots) => total + day.slots.length, 0);
-    console.log('Total available slots:', totalSlots);
+    // Call the Edge Function to get available slots
+    const { data: slotsData, error: functionError } =
+      await supabase.functions.invoke("get-available-slots", {
+        body: JSON.stringify({
+          timezone: userTimezone,
+          startDate,
+          endDate,
+        }),
+      });
 
-    // Format the response
-    const response = {
-      availableSlots: ghlData,
-      totalAvailableSlots: totalSlots
-    };
+    if (functionError) {
+      throw new Error(functionError.message);
+    }
 
-    return NextResponse.json(response);
+    return NextResponse.json(slotsData);
   } catch (error) {
-    console.error('Error in checkBookedSlots:', error);
+    console.error("Error fetching available slots:", error);
+
     return NextResponse.json(
-      { error: 'Failed to fetch available slots' },
-      { status: 500 }
+      {
+        error:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      },
+      {
+        status: 500,
+      },
     );
   }
 }
