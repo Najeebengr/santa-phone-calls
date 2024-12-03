@@ -60,8 +60,8 @@ function Header({ className = "" }: HeaderProps) {
                   {item.name}
                 </button>
               </DialogTrigger>
-              <DialogContent className="p-0 border-none w-[90%] xl:w-full">
-                <DialogHeader className="p-0 rounded-xl">
+              <DialogContent className="p-0 bg-transparent shadow-none border-none w-[65vw]">
+                <DialogHeader className="p-0 space-y-0 rounded-xl">
                   <DialogTitle className="sr-only">
                     How It Works Video
                   </DialogTitle>

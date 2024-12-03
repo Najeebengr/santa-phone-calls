@@ -1,30 +1,35 @@
-'use client'
+"use client";
 
-import { plans } from "../lib/constants"
-import Image from 'next/image'
-import { Plan } from "../lib/types"
-import { useRouter } from "next/navigation"
-import { useEffect } from 'react';
-import { trackPageView, trackAddToCart } from '../utils/analytics'
-
+import { plans } from "../lib/constants";
+import Image from "next/image";
+import { Plan } from "../lib/types";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { trackPageView, trackAddToCart } from "../utils/analytics";
+import Link from "next/link";
 function Pricing() {
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
-    trackPageView('pricing');
+    trackPageView("pricing");
   }, []);
 
-
   const handlePlanSelect = (plan: Plan) => {
-
     trackAddToCart(plan);
-    router.push(`/checkout?planId=${plan.id}&packageName=${encodeURIComponent(plan.name)}&totalAmount=${plan.price}&hasRecording=${plan.hasRecording ?? false}`);
+    router.push(
+      `/checkout?planId=${plan.id}&packageName=${encodeURIComponent(plan.name)}&totalAmount=${plan.price}&hasRecording=${plan.hasRecording ?? false}`,
+    );
   };
 
   return (
-    <section className={`bg-[url('/christmas.jpeg')] bg-cover bg-center bg-no-repeat min-h-screen w-full px-6 xl:px-0 py-10 mx-auto relative z-10`}>
-      <div 
-        style={{background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 50%)'}} 
+    <section
+      className={`bg-[url('/christmas.jpeg')] bg-cover bg-center bg-no-repeat min-h-screen w-full px-6 xl:px-0 py-10 mx-auto relative z-10`}
+    >
+      <div
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 50%)",
+        }}
         className="absolute inset-0"
       />
       <div className="container mx-auto relative z-10">
@@ -35,14 +40,15 @@ function Pricing() {
           Jimmy&lsquo;s Live Call with Santa is <br />
           Just One Step Away
         </h2>
-        <div className="grid lg:grid-cols-3 gap-8 md:max-w-[80vw] xl:max-w-[60vw] 2xl:max-w-[45vw] lg:max-w-[73vw] mx-auto py-10">
+        <div className="grid lg:grid-cols-2 gap-8 md:max-w-[80vw] xl:max-w-[80vw] 2xl:max-w-[65vw] lg:max-w-[90vw] mx-auto py-10">
           {plans.map((plan: Plan) => (
             <div
               key={plan.id}
               style={{
-                background: plan.id === 2
-                  ? "#695438"
-                  : "linear-gradient(176.55deg, #51422F -9.63%, #121212 97.16%)",
+                background:
+                  plan.id === 2
+                    ? "#695438"
+                    : "linear-gradient(176.55deg, #51422F -9.63%, #121212 97.16%)",
                 border: "3px solid #D9C999CC",
                 boxShadow: "0px 0px 40px 0px #00000080 inset",
               }}
@@ -56,10 +62,11 @@ function Pricing() {
                   {plan.name}
                 </p>
               </div>
-　　 　　　　　
+              　　 　　　　　
               <div
                 style={{
-                  background: "linear-gradient(92.63deg, #D7C798 34.94%, #EDE4CC 53.8%, #D7C798 78.45%)",
+                  background:
+                    "linear-gradient(92.63deg, #D7C798 34.94%, #EDE4CC 53.8%, #D7C798 78.45%)",
                 }}
                 className="flex-none mt-10 lg:mt-5 xl:mt-10"
               >
@@ -68,29 +75,33 @@ function Pricing() {
                   <span className="text-xl font-normal ml-2">{plan.per}</span>
                 </p>
               </div>
-　　 　　　　　
+              　　 　　　　　
               <div className="flex-grow px-8 md:px-14 py-25">
-                <p className={`text-center font-harmonia text-lg ${
-                  plan.id === 2 ? "text-white" : "text-[#FFFFFF80]"
-                }`}>
+                <p
+                  className={`text-center font-harmonia text-lg ${
+                    plan.id === 2 ? "text-white" : "text-[#FFFFFF80]"
+                  }`}
+                >
                   {plan.description}
                 </p>
               </div>
-　　 　　　　　
+              　　 　　　　　
               <div className="flex-none px-4 mb-20">
-                <button
-                  onClick={() => handlePlanSelect(plan)}
-                  style={{
-                    background: 'linear-gradient(144.94deg, #C70A27 31.33%, #7B0F10 100.41%)',
-                    border: '3px solid #a5494d',
-                    boxShadow: '0px 0px 40px 0px #D9C99966'
-                  }}
-                  className="w-full font-seasons text-xl whitespace-nowrap flex justify-center items-center text-white font-bold py-3 px-8 rounded-full"
-                >
-                  Buy Now
-                </button>
+                <Link href={"/"}>
+                  <button
+                    onClick={() => handlePlanSelect(plan)}
+                    style={{
+                      background:
+                        "linear-gradient(144.94deg, #C70A27 31.33%, #7B0F10 100.41%)",
+                      border: "3px solid #a5494d",
+                      boxShadow: "0px 0px 40px 0px #D9C99966",
+                    }}
+                    className="w-fit mx-auto relative z-10 font-seasons text-base md:text-xl  flex justify-center items-center gap-2 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 hover:opacity-90 hover:scale-[0.99] active:scale-[0.97]"
+                  >
+                    Continue to Step 1
+                  </button>
+                </Link>
               </div>
-
               <Image
                 src="/corner_right.png"
                 width={170}
@@ -110,7 +121,7 @@ function Pricing() {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
-export default Pricing
+export default Pricing;

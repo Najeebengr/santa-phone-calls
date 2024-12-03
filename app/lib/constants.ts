@@ -28,36 +28,36 @@ export const features = [
   },
   {
     id: 3,
-    name: "Magical Caller ID: “Santa&lsquo;s House”",
+    name: "Magical Caller ID: “Santa's House”",
   },
   {
     id: 4,
     name: "On-Demand Scheduling",
   },
-  {
-    id: 5,
-    name: "Speak with Other Characters",
-  },
-  {
-    id: 6,
-    name: "Recording Add-On Option",
-  },
-  {
-    id: 7,
-    name: "Affordable Pricing",
-  },
-  {
-    id: 8,
-    name: "Real-Time Magic Experience",
-  },
-  {
-    id: 9,
-    name: "Exclusive Christmas Eve Calls",
-  },
-  {
-    id: 10,
-    name: "No Waiting in Line",
-  },
+  // {
+  //   id: 5,
+  //   name: "Speak with Other Characters",
+  // },
+  // {
+  //   id: 6,
+  //   name: "Recording Add-On Option",
+  // },
+  // {
+  //   id: 7,
+  //   name: "Affordable Pricing",
+  // },
+  // {
+  //   id: 8,
+  //   name: "Real-Time Magic Experience",
+  // },
+  // {
+  //   id: 9,
+  //   name: "Exclusive Christmas Eve Calls",
+  // },
+  // {
+  //   id: 10,
+  //   name: "No Waiting in Line",
+  // },
   {
     id: 11,
     name: "COVID-Safe Option",
@@ -70,7 +70,7 @@ export const SantaPhoneCalls = [
   },
   {
     id: 2,
-    name: "(Child&lsquo;s Details Adapted)",
+    name: "(Child's Details Adapted)",
   },
   {
     id: 3,
@@ -143,7 +143,7 @@ export const PNP = [
   {
     id: 7,
     name: "($14.99 and up)",
-    status: "tick",
+    status: "cross",
   },
   {
     id: 8,
@@ -299,13 +299,13 @@ export const plans: Plan[] = [
     per: "/ Recording",
     hasRecording: true,
   },
-  {
-    id: 3,
-    name: "Santa's Family Bundle",
-    description:
-      "A one-time, personalized call from Santa for the whole family, creating a magical moment that fills everyone with joyful holiday cheer they’ll remember forever.",
-    price: 19.95,
-    per: "/ Call",
-    hasRecording: false,
-  },
+  // {
+  //   id: 3,
+  //   name: "Santa’s Family Bundle",
+  //   description:
+  //     "A one-time, personalized call from Santa for the whole family, creating a magical moment that fills everyone with joyful holiday cheer they’ll remember forever.",
+  //   price: 19.95,
+  //   per: "/ Call",
+  //   hasRecording: false,
+  // },
 ];

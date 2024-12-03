@@ -1,11 +1,12 @@
-modules = ["nodejs-20", "web"]
 run = "npm run dev"
+modules = ["nodejs-20", "web"]
 
 [nix]
 channel = "stable-24_05"
 
 [deployment]
-run = ["sh", "-c", "npm run build"]
+build = ["npm", "run", "build"]
+run = ["npm", "run", "start"]
 
 [[ports]]
 localPort = 3000
@@ -14,19 +15,3 @@ externalPort = 80
 [[ports]]
 localPort = 3001
 externalPort = 3001
-
-[[ports]]
-localPort = 3002
-externalPort = 3002
-
-[[ports]]
-localPort = 3003
-externalPort = 3003
-
-[[ports]]
-localPort = 3004
-externalPort = 3000
-
-[[ports]]
-localPort = 3005
-externalPort = 4200

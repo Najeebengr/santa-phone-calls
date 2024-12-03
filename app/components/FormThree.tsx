@@ -7,12 +7,18 @@ import CheckoutPage from "./CheckoutPage";
 import convertToSubCurrency from "../lib/convertToSubCurrency";
 import type { Child } from "@/lib/validation/schema";
 
-// Ensure stripe key exists
-if (!process.env["NEXT_PUBLIC_STRIPE_PUBLIC_KEY"]) {
-  throw new Error("Stripe public key is not defined");
-}
+// Check if we're in production or development
 
-const stripePromise = loadStripe(process.env["NEXT_PUBLIC_STRIPE_PUBLIC_KEY"]);
+// Choose the appropriate keys based on environment
+
+// const stripePublicKey = isProduction
+//   ? process.env.NEXT_PUBLIC_STRIPE_LIVE_PUBLIC_KEY
+//   : process.env.NEXT_PUBLIC_STRIPE_TEST_PUBLIC_KEY;
+
+// const stripePromise = loadStripe(process.env["NEXT_PUBLIC_STRIPE_PUBLIC_KEY"]);
+const stripePromise = loadStripe(
+  process.env["NEXT_PUBLIC_STRIPE_PUBLIC_KEY"] as string,
+);
 
 interface FormThreeProps {
   // Package Info
@@ -106,7 +112,7 @@ function FormThree(props: FormThreeProps) {
                 backgroundColor: "#554735",
               },
               ".Span": { color: "#FFFFFF" },
-              ".Label": { color: "#FFFFFF" },
+              ".Label": { fontSize: "15px", color: "#FFFFFF" },
             },
           },
         }}

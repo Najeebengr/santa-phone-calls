@@ -38,8 +38,8 @@ function Footer() {
                   />
                 </div>
               </DialogTrigger>
-              <DialogContent className="p-0 border-none xl:h-[75vh]  w-[75vw] h-[75vh] lg:h-[75vh] lg:w-[75vw] xl:w-[75vw] overflow-x-scroll overflow-y-scroll  2xl:h-[75vh]">
-                <DialogHeader className="p-0 rounded-xl">
+              <DialogContent className="p-0 bg-transparent shadow-none border-none w-[65vw]   lg:w-[65vw] xl:w-[65vw] ">
+                <DialogHeader className="p-0 rounded-xl xl:h-[65vh] justify-center  h-[65vh] lg:h-[65vh]   overflow-x-scroll overflow-y-scroll  2xl:h-[65vh]">
                   <Table className="p-0 ">
                     <TableHeader className="p-0 ">
                       <TableRow className="p-0 ">
@@ -76,10 +76,7 @@ function Footer() {
                           </TableCell>
 
                           {/* SantaPhoneCalls */}
-                          <TableCell className="bg-[#604f39] p-3 border-[#ddd0a5] border-2 text-white font-harmonia text-xl text-center">
-                            {SantaPhoneCalls.find(
-                              (item) => item.id === feature.id,
-                            )?.name || ""}
+                          <TableCell className="bg-[#604f39] p-3 border-[#ddd0a5] border-2 text-white font-harmonia text-lg text-center">
                             <Image
                               src="/CheckCircle.svg"
                               alt="tick"
@@ -87,10 +84,13 @@ function Footer() {
                               height={10}
                               className="mx-auto my-1"
                             />
+                            {SantaPhoneCalls.find(
+                              (item) => item.id === feature.id,
+                            )?.name || ""}
                           </TableCell>
 
                           {/* PNP */}
-                          <TableCell className="bg-[#46382a] p-3 border-[#ddd0a5] border-2 text-white font-harmonia text-xl text-center">
+                          <TableCell className="bg-[#46382a] p-3 border-[#ddd0a5] border-2 text-white font-harmonia text-lg text-center">
                             {PNP.find((item) => item.id === feature.id)
                               ?.status === "tick" ? (
                               <Image
@@ -116,7 +116,7 @@ function Footer() {
                           </TableCell>
 
                           {/* MessageFromSanta */}
-                          <TableCell className="bg-[#46382a] p-3 border-[#ddd0a5] border-2 text-white font-harmonia text-xl text-center">
+                          <TableCell className="bg-[#46382a] p-3 border-[#ddd0a5] border-2 text-white font-harmonia text-lg text-center">
                             {MessageFromSanta.find(
                               (item) => item.id === feature.id,
                             )?.status === "tick" ? (
@@ -144,7 +144,7 @@ function Footer() {
                           </TableCell>
 
                           {/* MallSantaExperience */}
-                          <TableCell className="bg-[#46382a] p-3 border-[#ddd0a5] border-2 text-white font-harmonia text-xl text-center">
+                          <TableCell className="bg-[#46382a] p-3 border-[#ddd0a5] border-2 text-white font-harmonia text-lg text-center">
                             {MallSantaExperience.find(
                               (item) => item.id === feature.id,
                             )?.status === "tick" ? (

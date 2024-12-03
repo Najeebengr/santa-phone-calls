@@ -10,7 +10,7 @@ function Checkout() {
   const [activePlan, setActivePlan] = useState(plans[1].id);
   const [price, setPrice] = useState(plans[1].price);
   const [planName, setPlanName] = useState(plans[1].name);
-  const [childrenCount, setChildrenCount] = useState(1);
+  // const [childrenCount, setChildrenCount] = useState(1);
   const [childName, setChildName] = useState("");
 
   useEffect(() => {
@@ -20,18 +20,11 @@ function Checkout() {
         : null;
     if (checkoutData) {
       const parsedData = JSON.parse(checkoutData);
-      const numChildren = parsedData.children?.length || 1;
-      setChildrenCount(numChildren);
+      // const numChildren = parsedData.children?.length || 1;
+      // setChildrenCount(numChildren);
       setChildName(parsedData.children[0].name);
 
-      let selectedPlan;
-      if (numChildren > 1) {
-        // Family bundle
-        selectedPlan = plans[2];
-      } else {
-        // Default to second plan for single child
-        selectedPlan = plans[1];
-      }
+      const selectedPlan = plans[1];
 
       // Update both state and localStorage
       setActivePlan(selectedPlan.id);
@@ -46,7 +39,7 @@ function Checkout() {
         price: selectedPlan.price,
         totalAmount: selectedPlan.price,
         hasRecording:
-          selectedPlan.id === plans[1].id || selectedPlan.id === plans[2].id,
+          selectedPlan.id === plans[1].id || selectedPlan.id === plans[1].id,
         packageName: selectedPlan.name,
       };
       localStorage.setItem("checkoutData", JSON.stringify(updatedData));
@@ -55,9 +48,6 @@ function Checkout() {
 
   const handlePlanChange = (id: number) => {
     // Only allow plan changes if it's a single child
-    if (childrenCount > 1 && id !== plans[2].id) {
-      return; // Don't allow changing from family bundle for multiple children
-    }
 
     const selectedPlan = plans.find((plan) => plan.id === id);
     if (selectedPlan) {
@@ -74,7 +64,7 @@ function Checkout() {
           planId: selectedPlan.id,
           planName: selectedPlan.name,
           packageName: selectedPlan.name,
-          hasRecording: id === plans[1].id || id === plans[2].id,
+          hasRecording: id === plans[1].id,
           totalAmount: selectedPlan.price,
           price: selectedPlan.price,
         };
@@ -102,7 +92,7 @@ function Checkout() {
     planName: planName,
     planId: activePlan,
     ...parsedData,
-    hasRecording: activePlan === plans[1].id || activePlan === plans[2].id, // Set hasRecording based on plan
+    hasRecording: activePlan === plans[1].id, // Set hasRecording based on plan
   };
 
   return (
@@ -145,7 +135,8 @@ function Checkout() {
               {planName}
             </p>
             <p className="my-2 font-harmonia text-base text-[#FFFFFF80]">
-              Jimmy is going to receive from Santa and he will talk about...
+              {childName} is going to receive from Santa and he will talk
+              about...
             </p>
           </div>
           <div className="total my-5">
@@ -164,17 +155,16 @@ function Checkout() {
             <p className="text-center font-harmonia text-base md:text-xl text-[#FFFFFF80]">
               By continuing, you agree to the{" "}
               <Link
-                href={"/"}
+                href={"/terms"}
                 className="border-b-[1px] text-white border-white"
               >
-                Terms of Sale
-              </Link>
-              ,{" "}
-              <Link href={"/"} className="border-b-2 text-white border-white">
-                Terms of Use
+                Terms
               </Link>{" "}
               and{" "}
-              <Link href={"/"} className="border-b-2 text-white border-white">
+              <Link
+                href={"/privacy"}
+                className="border-b-2 text-white border-white"
+              >
                 Privacy Policy
               </Link>
             </p>
@@ -193,11 +183,7 @@ function Checkout() {
                     : "linear-gradient(176.55deg, #51422F -9.63%, #121212 97.16%)",
                 border: "3px solid #D9C999CC",
                 boxShadow: "0px 0px 40px 0px #00000080 inset",
-                opacity: childrenCount > 1 && plan.id !== plans[2].id ? 0.5 : 1,
-                cursor:
-                  childrenCount > 1 && plan.id !== plans[2].id
-                    ? "not-allowed"
-                    : "pointer",
+                opacity: 1,
               }}
               className=" h-[50%] relative flex flex-col gap-10 lg:gap-5 xl:gap-10 rounded-lg py-5"
             >

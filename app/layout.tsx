@@ -56,7 +56,7 @@ export default function RootLayout({
   //   .join(" ");
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {seoConfig.dnsPrefetch.map((href) => (
           <link key={href} rel="dns-prefetch" href={href} />

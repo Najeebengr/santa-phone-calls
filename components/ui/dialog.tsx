@@ -3,7 +3,6 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 
 const Dialog = DialogPrimitive.Root;
@@ -30,13 +29,10 @@ const DialogOverlay = React.forwardRef<
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ElementRef<typeof DialogPrimitive.Content> & { dialogId?: string },
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
   // Ensure there's a DialogTitle among children
-  const hasDialogTitle = React.Children.toArray(children).some(
-    (child) => React.isValidElement(child) && child.type === DialogTitle,
-  );
 
   // if (!hasDialogTitle) {
   //   console.warn(
@@ -58,7 +54,24 @@ const DialogContent = React.forwardRef<
         {children}
         <DialogPrimitive.Close className="absolute rounded-lg -right-4 -top-12 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none  focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
           <X className="h-8 w-10 text-[#D9C999]" />
+
           <span className="sr-only">Close</span>
+        </DialogPrimitive.Close>
+
+        {/* dialogId === "dialog1" &&  */}
+
+        <DialogPrimitive.Close>
+          <button
+            style={{
+              background:
+                "linear-gradient(144.94deg, #C70A27 31.33%, #7B0F10 100.41%)",
+              border: "3px solid #a5494d ",
+              boxShadow: "0px 0px 40px 0px #D9C99966",
+            }}
+            className="w-fit mx-auto relative z-10 font-seasons text-base md:text-xl  flex justify-center items-center gap-2 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 hover:opacity-90 hover:scale-[0.99] active:scale-[0.97] "
+          >
+            Back to Step 1
+          </button>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPortal>

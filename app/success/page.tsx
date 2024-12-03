@@ -53,7 +53,7 @@ function SuccessContent() {
           className="text-4xl md:text-5xl font-seasons text-white mb-4"
           style={{ textShadow: "0 0 20px #FCCC73" }}
         >
-          Thank You!
+          Thank You<span style={{ fontFamily: "Arial" }}>!</span>
         </h1>
 
         <p className="text-xl md:text-2xl font-harmonia text-[#D7C798] mb-2">

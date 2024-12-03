@@ -15,7 +15,6 @@ import {
 import InputField from "./InputField";
 import TextAreaField from "./TextAreaField";
 import { CustomCalendar } from "../components/custom-calendar";
-import type { CheckoutPageProps as CheckoutData } from "./types/checkout";
 import { plans } from "../lib/constants";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -29,7 +28,51 @@ import {
 import Loader from "./Loader";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const parseCustomDateFormat = (dateString: string) => {
+interface UserInfo {
+  parentName: string;
+  parentEmail: string;
+  parentNumber: string;
+}
+
+interface FormTwoProps {
+  userInfo?: UserInfo;
+}
+
+interface ParentData {
+  parentName: string;
+  parentEmail: string;
+  parentPhone: string;
+}
+
+interface CheckoutData {
+  totalAmount: number;
+  id: string;
+  price: number;
+  planId: number;
+  packageName: string;
+  planName: string;
+  hasRecording: boolean;
+  selectedSlot: string;
+  selectedTimezone: string;
+  parentName: string;
+  parentEmail: string;
+  parentPhone: string;
+  children: {
+    id: string;
+    name: string;
+    age: number;
+    gender: "Male" | "Female";
+    connections: string;
+    details: string;
+    hobbies: string;
+  }[];
+  callNow: boolean;
+  when: number;
+  recipientName: string;
+  recipientPhone: string;
+}
+
+const parseCustomDateFormat = (dateString: string): Date => {
   const dateTimeParts = dateString.match(
     /(\d+)(AM|PM)\s+(\w+)\s+(\d+)\s+(\d+)/i,
   );
@@ -64,21 +107,13 @@ const parseCustomDateFormat = (dateString: string) => {
   return date;
 };
 
-function FormTwo({
-  userInfo,
-}: {
-  userInfo?: { parentName: string; parentEmail: string; parentNumber: string };
-}) {
+function FormTwo({ userInfo }: FormTwoProps) {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [sendAsGift, setSendAsGift] = useState(false);
   const [isScheduled, setIsScheduled] = useState(false);
-  const [parentData, setParentData] = useState<{
-    parentName: string;
-    parentEmail: string;
-    parentPhone: string;
-  } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [parentData, setParentData] = useState<ParentData | null>(null);
 
   const formId = useMemo(() => crypto.randomUUID(), []);
 
@@ -122,19 +157,17 @@ function FormTwo({
     name: "children",
   });
 
-  // Update the formatDateTime function to match the expected format
   const formatDateTime = useCallback((selectedTime: string) => {
     try {
       const scheduledDate = selectedTime.includes("T")
         ? new Date(selectedTime)
         : parseCustomDateFormat(selectedTime);
 
-      // Format the date in M/d/yyyy, hh:mm a format
       const formattedDateTime = scheduledDate.toLocaleString("en-US", {
-        month: "numeric", // Changed from "2-digit" to "numeric"
-        day: "numeric", // Changed from "2-digit" to "numeric"
+        month: "numeric",
+        day: "numeric",
         year: "numeric",
-        hour: "numeric", // Changed from "2-digit" to "numeric"
+        hour: "numeric",
         minute: "2-digit",
         hour12: true,
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -154,51 +187,16 @@ function FormTwo({
     }
   }, []);
 
-  const calculatePrice = useCallback(
-    (childrenCount: number, hasRecording: boolean) => {
-      const plan =
-        childrenCount > 1 ? plans[2] : hasRecording ? plans[1] : plans[0];
-      return {
-        price: plan.price,
-        planId: plan.id,
-        planName: plan.name,
-      };
-    },
-    [],
-  );
-
-  // Load user data on mount
-  useEffect(() => {
-    if (userInfo) {
-      setParentData({
-        parentName: userInfo.parentName,
-        parentEmail: userInfo.parentEmail,
-        parentPhone: userInfo.parentNumber,
-      });
-    } else if (typeof window !== "undefined") {
-      const storedData = localStorage.getItem("userFormData");
-      if (!storedData) {
-        toast.error("Please complete step 1 first");
-        router.push("/");
-        return;
-      }
-      try {
-        setParentData(JSON.parse(storedData));
-      } catch (error) {
-        console.error("Error parsing stored data:", error);
-        toast.error("Error loading user data");
-        router.push("/");
-      }
-    }
-  }, [userInfo, router]);
-
-  useEffect(() => {
-    if (Object.keys(errors).length > 0) {
-      Object.entries(errors).forEach(([field, error]) => {
-        if (error?.message) toast.error(`${field}: ${error.message}`);
-      });
-    }
-  }, [errors]);
+  // Replace the existing calculatePrice function with this:
+  const calculatePrice = useCallback(() => {
+    // Always use plan[1] as the default package
+    const plan = plans[1];
+    return {
+      price: plan.price,
+      planId: plan.id,
+      planName: plan.name,
+    };
+  }, []);
 
   const addAnotherChild = useCallback(() => {
     if (fields.length >= 5) {
@@ -216,33 +214,55 @@ function FormTwo({
     });
   }, [fields.length, append]);
 
+  useEffect(() => {
+    async function fetchParentData() {
+      if (userInfo) {
+        setParentData({
+          parentName: userInfo.parentName,
+          parentEmail: userInfo.parentEmail,
+          parentPhone: userInfo.parentNumber,
+        });
+      } else if (typeof window !== "undefined") {
+        try {
+          const storedData = await Promise.resolve(
+            localStorage.getItem("userFormData"),
+          );
+          if (!storedData) throw new Error("Missing Step 1 Data");
+
+          setParentData(JSON.parse(storedData));
+        } catch (error) {
+          console.error("Error loading user data:", error);
+          toast.error("Please complete step 1 first");
+          router.push("/");
+        }
+      }
+    }
+
+    fetchParentData();
+  }, [userInfo, router]);
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      Object.entries(errors).forEach(([field, error]) => {
+        if (error?.message) toast.error(`${field}: ${error.message}`);
+      });
+    }
+  }, [errors]);
+
   const onSubmit = async (data: Step2FormData) => {
-    if (isSubmitting) return;
-
+    setIsLoading(true);
     try {
-      setIsSubmitting(true);
-
       if (!parentData) {
         toast.error("Parent information is missing");
         return;
       }
 
-      // For debugging
-      console.log("Selected time before formatting:", selectedTime);
-
-      // Only format time if it's a scheduled call
       const { formattedDateTime, hoursUntil } =
         isScheduled && selectedTime
           ? formatDateTime(selectedTime)
           : { formattedDateTime: "", hoursUntil: 0 };
 
-      // For debugging
-      console.log("Formatted time:", formattedDateTime);
-
-      const { price, planId, planName } = calculatePrice(
-        data.children.length,
-        false,
-      );
+      const { price, planId, planName } = calculatePrice();
 
       const checkoutData: CheckoutData = {
         totalAmount: price,
@@ -270,29 +290,23 @@ function FormTwo({
         ),
         callNow: !isScheduled,
         when: isScheduled ? hoursUntil : 0,
-        recipientName: data.recipientName,
-        recipientPhone: data.recipientPhone,
+        recipientName: data.recipientName || "",
+        recipientPhone: data.recipientPhone || "",
       };
 
-      console.log("Submitting checkout data:", {
-        selectedTime,
-        formattedTime: formattedDateTime,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        isScheduled,
-        callNow: !isScheduled,
-      });
-
       localStorage.setItem("checkoutData", JSON.stringify(checkoutData));
-      router.push("/checkout");
+      await router.replace("/confirmation");
     } catch (error) {
       console.error("Form submission error:", error);
       toast.error("An unexpected error occurred");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
-  if (isSubmitting) return <Loader />;
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <form
@@ -369,7 +383,7 @@ function FormTwo({
                     <RadioGroupItem
                       value="Male"
                       id={`male-${index}`}
-                      className="w-4 h-4 border-2 border-white bg-white rounded-full data-[state=checked]:bg-black"
+                      className="w-4 h-4 border-2 border-white bg-white bg-opacity-0 rounded-full data-[state=checked]:bg-white"
                     />
                     <Label
                       htmlFor={`male-${index}`}
@@ -382,7 +396,7 @@ function FormTwo({
                     <RadioGroupItem
                       value="Female"
                       id={`female-${index}`}
-                      className="w-4 h-4 border-2 border-white bg-white rounded-full data-[state=checked]:bg-black"
+                      className="w-4 h-4 border-2 border-white bg-white bg-opacity-0 rounded-full data-[state=checked]:bg-white"
                     />
                     <Label
                       htmlFor={`female-${index}`}
@@ -421,17 +435,19 @@ function FormTwo({
 
           <TextAreaField
             label="Family Social Connections"
-            placeholder="Family and Social Connections: •	Siblings and Ages: 	•	Best Friend's Name(s): 	•	Pet(s) and Type (e.g., Buddy - dog):	•	Hobbies: 	•	Pets' Names: 	•	Pets'"
+            placeholder="Tell us about your family and friends! Share your siblings' names and ages, who your best friends are, and any pets you have in your family. What kind of activities do you enjoy doing together?"
             {...register(`children.${index}.connections`)}
           />
+
           <TextAreaField
             label="Holiday Specific Details"
-            placeholder="Holiday Specific Details (list up to three): •	Favorite Christmas Movie or Song: 	•	Family Holiday Traditions (e.g., decorating cookies):"
+            placeholder="Share your favorite holiday memories! What's your go-to Christmas movie or song? Do you have any special family traditions, like baking cookies together or decorating the tree?"
             {...register(`children.${index}.details`)}
           />
+
           <TextAreaField
             label="Interests and Hobbies"
-            placeholder="Interests and Hobbies: •	Favorite Activities (e.g. drawing, soccer):	•	Favorite School Subject: 	•	Favorite Foods/Treats: 	•	Favorite Colors and Animals:	•	Favorite Sports: 	•	Favorite Holidays: 	•	Favorite Places:"
+            placeholder="What makes you unique? Tell us about your favorite activities, from sports to arts and crafts. What subjects do you love at school? Share your favorite foods, colors, animals, and special places you enjoy visiting!"
             {...register(`children.${index}.hobbies`)}
           />
         </div>
@@ -460,38 +476,41 @@ function FormTwo({
         >
           Schedule a Call
         </p>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <input
-              type="radio"
-              style={{ accentColor: "#00E56C" }}
-              {...register("callType")}
+        <RadioGroup
+          defaultValue="Immediate"
+          className="flex flex-row items-center gap-6"
+          onValueChange={(value: "Immediate" | "Scheduled") => {
+            setIsScheduled(value === "Scheduled");
+            setValue("callType", value);
+          }}
+        >
+          <div className="flex items-center gap-1.5">
+            <RadioGroupItem
               value="Immediate"
               id="now"
-              onChange={() => setIsScheduled(false)}
+              className="w-4 h-4 border-2 border-white bg-white bg-opacity-0 rounded-full data-[state=checked]:bg-white"
             />
-            <label htmlFor="now" className="text-white text-sm font-harmonia">
+            <Label
+              htmlFor="now"
+              className="font-harmonia text-white text-[14px] leading-[17px] font-normal"
+            >
               Call in 5 minutes
-            </label>
+            </Label>
           </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="radio"
-              style={{ accentColor: "#00E56C" }}
+          <div className="flex items-center gap-1.5">
+            <RadioGroupItem
               value="Scheduled"
               id="schedule"
-              {...register("callType")}
-              onChange={() => setIsScheduled(true)}
+              className="w-4 h-4 border-2 border-white bg-white bg-opacity-0 rounded-full data-[state=checked]:bg-white"
             />
-            <label
+            <Label
               htmlFor="schedule"
-              className="text-white text-sm font-harmonia"
+              className="font-harmonia text-white text-[14px] leading-[17px] font-normal"
             >
               Schedule
-            </label>
+            </Label>
           </div>
-        </div>
-
+        </RadioGroup>
         {isScheduled && (
           <div className="flex flex-col gap-4 mt-4">
             <div className="flex w-full flex-col gap-1">
@@ -542,16 +561,23 @@ function FormTwo({
 
       <button
         type="submit"
+        disabled={isLoading}
         style={{
           background:
             "linear-gradient(144.94deg, #C70A27 31.33%, #7B0F10 100.41%)",
-          border: "3px solid #a5494d ",
+          border: "3px solid #a5494d",
           boxShadow: "0px 0px 40px 0px #D9C99966",
         }}
-        className="w-fit mx-auto relative z-10 font-seasons text-base md:text-xl my-12 flex justify-center items-center gap-2 text-white font-bold py-3 px-8 rounded-full"
+        className="w-fit mx-auto relative z-10 font-seasons text-base md:text-xl my-12 flex justify-center items-center gap-2 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 hover:opacity-90 hover:scale-[0.99] active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        Continue to Checkout
-        <FaArrowRight />
+        {!isLoading ? (
+          <>
+            Continue to Checkout
+            <FaArrowRight />
+          </>
+        ) : (
+          "Processing..."
+        )}
       </button>
     </form>
   );

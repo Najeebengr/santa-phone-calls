@@ -30,6 +30,7 @@ function FormOne() {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = methods;
 
@@ -42,6 +43,31 @@ function FormOne() {
       setValue("id", formId);
     }
   }, [formId, setValue]);
+
+  // Phone formatting function
+  const formatPhoneNumber = (value: string) => {
+    if (!value) return value;
+
+    // Remove all non-digits
+    const phoneNumber = value.replace(/[^\d]/g, "");
+
+    // Format the phone number
+    if (phoneNumber.length < 4) return phoneNumber;
+    if (phoneNumber.length < 7) {
+      return `(${phoneNumber.slice(0, 3)})-${phoneNumber.slice(3)}`;
+    }
+    return `(${phoneNumber.slice(0, 3)})-${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+  };
+
+  // Phone input change handler
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numbers = value.replace(/[^\d]/g, "");
+
+    if (numbers.length <= 10) {
+      setValue("parentPhone", numbers);
+    }
+  };
 
   const onSubmit = async (data: Step1FormData) => {
     setIsLoading(true);
@@ -61,7 +87,6 @@ function FormOne() {
       }
 
       localStorage.setItem("userFormData", JSON.stringify(data));
-      // toast.success("Information saved successfully!");
       router.replace("/info");
     } catch (err) {
       console.error("Error saving data:", err);
@@ -75,12 +100,14 @@ function FormOne() {
     return <Loader />;
   }
 
+  const phoneValue = watch("parentPhone");
+
   return (
     <>
       <div className="w-full flex justify-center">
         <h2
           style={{ textShadow: "0 0 20px #FCCC73" }}
-          className="pb-5 text-3xl md:text-4xl 2xl:text-7xl font-black text-center font-seasons  text-white"
+          className="pb-5 text-3xl md:text-4xl 2xl:text-7xl font-black text-center font-seasons text-white"
         >
           Enter Basics to Get Started:
         </h2>
@@ -88,7 +115,7 @@ function FormOne() {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex pb-32 md:pb-10 md:px-0 flex-col gap-4 justify-center"
+        className="flex pb-32 md:pb-24 md:px-0 flex-col gap-4 justify-center"
       >
         <div
           className={`relative w-full lg:w-[30%] md:w-[40%] mx-auto ${errors.parentName ? "mb-4" : "mb-1"}`}
@@ -128,7 +155,8 @@ function FormOne() {
           >
             <Image src="/call.svg" width={40} height={10} alt="phone" />
             <input
-              {...register("parentPhone")}
+              value={formatPhoneNumber(phoneValue)}
+              onChange={handlePhoneChange}
               placeholder="Your Phone"
               className="text-black font-harmonia placeholder:font-seasons placeholder:text-black focus:outline-none bg-inherit w-full h-full rounded-full px-2"
               style={{ fontFamily: "font-seasons" }}
@@ -173,7 +201,7 @@ function FormOne() {
 
         <button
           type="submit"
-          className="relative w-fit mx-auto font-seasons text-lg md:text-xl my-3 flex justify-center items-center gap-2 text-white font-bold py-3 px-8 rounded-full overflow-hidden group"
+          className="relative hover:scale-[0.99] active:scale-[0.97] w-fit mx-auto font-seasons text-lg md:text-xl my-3 flex justify-center items-center gap-2 text-white font-bold py-3 px-8 rounded-full overflow-hidden group z-30"
           style={{
             background:
               "linear-gradient(144.94deg, #C70A27 31.33%, #7B0F10 100.41%)",

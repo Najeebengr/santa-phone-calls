@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3000",
     "lint": "next lint",
     "clean": "rm -rf node_modules .next && npm install",
     "prebuild": "npm run lint",
@@ -58,6 +58,7 @@
     "eslint": "^9.15.0",
     "eslint-config-next": "15.0.3",
     "mini-css-extract-plugin": "^2.9.2",
+    "next-sitemap": "^4.2.3",
     "node-fetch": "^3.3.2",
     "style-loader": "^4.0.0",
     "tailwindcss": "^3.4.1",
